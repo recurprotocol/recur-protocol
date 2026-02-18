@@ -1,6 +1,3 @@
-bash
-cat /home/claude/recur-stackblitz.jsx
-Output
 import { useState, useEffect, useRef, useCallback } from "react";
 
 /* ═══════════════════════════════════════════════════════
