@@ -31,15 +31,15 @@ const css = `
 
 /* ── DATA ── */
 const ATTACK_TYPES = {
-  INJECTION:  {label:"PROMPT INJECTION", color:"#ff0033",icon:"⚡"},
-  EXTRACTION: {label:"DATA EXTRACTION",  color:"#ff6b00",icon:"⬇"},
-  JAILBREAK:  {label:"JAILBREAK ATTEMPT",color:"#ffc300",icon:"🔓"},
-  INVERSION:  {label:"MODEL INVERSION",  color:"#ff0033",icon:"↩"},
-  POISONING:  {label:"DATA POISONING",   color:"#ff6b00",icon:"☠"},
-  ADVERSARIAL:{label:"ADVERSARIAL INPUT",color:"#ffc300",icon:"⚙"},
-  BOUNDARY:   {label:"BOUNDARY PROBE",   color:"#ffc300",icon:"⚠"},
-  ENCODING:   {label:"ENCODING ATTACK",  color:"#ff6b00",icon:"🔢"},
-  HEURISTIC:  {label:"HEURISTIC THREAT", color:"#ff6b00",icon:"⚙"},
+  INJECTION:  {label:"PROMPT INJECTION", color:"#ff0033",icon:"//"},
+  EXTRACTION: {label:"DATA EXTRACTION",  color:"#ff6b00",icon:">>"},
+  JAILBREAK:  {label:"JAILBREAK ATTEMPT",color:"#ffc300",icon:"[]"},
+  INVERSION:  {label:"MODEL INVERSION",  color:"#ff0033",icon:"<>"},
+  POISONING:  {label:"DATA POISONING",   color:"#ff6b00",icon:"XX"},
+  ADVERSARIAL:{label:"ADVERSARIAL INPUT",color:"#ffc300",icon:"##"},
+  BOUNDARY:   {label:"BOUNDARY PROBE",   color:"#ffc300",icon:"--"},
+  ENCODING:   {label:"ENCODING ATTACK",  color:"#ff6b00",icon:"0x"},
+  HEURISTIC:  {label:"HEURISTIC THREAT", color:"#ff6b00",icon:"??"},
 };
 
 const IP_ASSETS = [
@@ -168,10 +168,9 @@ function Nav({page, setPage, apiOnline}) {
       padding:"0 32px",height:54,gap:32,
     }}>
       {/* Logo */}
-      <div onClick={()=>setPage("landing")} style={{
-        fontFamily:"'Bebas Neue',sans-serif",fontSize:22,letterSpacing:7,
-        color:"#00ff41",textShadow:"0 0 20px rgba(0,255,65,0.6)",cursor:"pointer",flexShrink:0,
-      }}>RECUR</div>
+      <div onClick={()=>setPage("landing")} style={{cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center"}}>
+        <img src="/logo.png" alt="RECUR" style={{height:36,width:36,objectFit:"contain"}}/>
+      </div>
 
       {/* Divider */}
       <div style={{width:1,height:20,background:"var(--border)"}}/>
@@ -222,12 +221,12 @@ function Nav({page, setPage, apiOnline}) {
 /* ── LANDING PAGE ── */
 function Landing({setPage}) {
   const features = [
-    {icon:"⚡",title:"Prompt Injection Defence",      desc:"Every prompt intercepted and classified before reaching your AI provider. Direct overrides, nested injections and role-play manipulations blocked in real time."},
-    {icon:"⬇",title:"IP Extraction Prevention",       desc:"Canary token injection and context monitoring protect system prompts and proprietary model config from targeted extraction attacks."},
-    {icon:"🔓",title:"Jailbreak Immunisation",         desc:"DAN variants, persona manipulation, developer mode exploits and boundary probing detected across five attack categories with continuously updated signatures."},
-    {icon:"🔄",title:"Self-Evolving Sentinels",         desc:"Novel attack vectors trigger sentinel mutation and sub-agent spawning. The network gets stronger with every attack it encounters — no manual updates required."},
-    {icon:"⛓",title:"On-Chain Attestation",            desc:"Security events committed to Solana as ZK proofs. Verifiable, immutable records of your AI deployment's security posture — without exposing prompt data."},
-    {icon:"🔌",title:"Two-Minute Integration",          desc:"Replace your OpenAI or Anthropic endpoint with RECUR's proxy. Pass your provider key in a header. No SDK, no code changes to your application logic."},
+    {icon:"01",title:"Prompt Injection Defence",      desc:"Every prompt intercepted and classified before reaching your AI provider. Direct overrides, nested injections and role-play manipulations blocked in real time."},
+    {icon:"02",title:"IP Extraction Prevention",       desc:"Canary token injection and context monitoring protect system prompts and proprietary model config from targeted extraction attacks."},
+    {icon:"03",title:"Jailbreak Immunisation",         desc:"DAN variants, persona manipulation, developer mode exploits and boundary probing detected across five attack categories with continuously updated signatures."},
+    {icon:"04",title:"Self-Evolving Sentinels",         desc:"Novel attack vectors trigger sentinel mutation and sub-agent spawning. The network gets stronger with every attack it encounters — no manual updates required."},
+    {icon:"05",title:"On-Chain Attestation",            desc:"Security events committed to Solana as ZK proofs. Verifiable, immutable records of your AI deployment's security posture — without exposing prompt data."},
+    {icon:"06",title:"Two-Minute Integration",          desc:"Replace your OpenAI or Anthropic endpoint with RECUR's proxy. Pass your provider key in a header. No SDK, no code changes to your application logic."},
   ];
 
   const code = `// Before — direct to OpenAI
@@ -262,8 +261,8 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         </div>
 
         <h1 style={{fontFamily:"'Bebas Neue',sans-serif",lineHeight:0.9,marginBottom:28,
-          fontSize:"clamp(80px,15vw,170px)",letterSpacing:18,color:"#00ff41",
-          animation:"glow-pulse 4s ease-in-out infinite, fade-up 0.7s ease 0.1s both"}}>
+          fontSize:"clamp(80px,15vw,170px)",letterSpacing:18,color:"#ffffff",
+          animation:"fade-up 0.7s ease 0.1s both"}}>
           RECUR
         </h1>
 
@@ -273,7 +272,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         </p>
         <p style={{fontFamily:"'Fira Code',monospace",fontSize:10,color:"var(--text-d)",maxWidth:440,
           lineHeight:1.8,marginBottom:52,letterSpacing:1,animation:"fade-up 0.7s ease 0.3s both",opacity:0}}>
-          Built on Solana · OpenAI &amp; Anthropic compatible · Immutable on-chain proofs
+          Built for Solana · OpenAI &amp; Anthropic compatible · Immutable on-chain proofs
         </p>
 
         <div style={{display:"flex",gap:14,flexWrap:"wrap",justifyContent:"center",
@@ -346,7 +345,9 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
           {features.map((f,i)=>(
             <Panel key={i} style={{padding:"30px 26px"}}>
-              <div style={{fontSize:28,marginBottom:14}}>{f.icon}</div>
+              <div style={{fontFamily:"'Fira Code',monospace",fontSize:11,color:"var(--text-d)",
+                letterSpacing:2,marginBottom:14,border:"1px solid var(--border)",
+                display:"inline-block",padding:"3px 8px"}}>{f.icon}</div>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:3,
                 color:"#00ff41",marginBottom:10}}>{f.title}</div>
               <div style={{fontSize:10,color:"var(--text-d)",lineHeight:1.85}}>{f.desc}</div>
@@ -444,7 +445,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,letterSpacing:5,color:"var(--text-d)"}}>
           RECUR PROTOCOL
         </div>
-        <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>BUILT ON SOLANA · {new Date().getFullYear()}</div>
+        <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>BUILT FOR SOLANA · {new Date().getFullYear()}</div>
         <a href="https://github.com/luxioxau/recur-protocol" target="_blank" rel="noreferrer"
           style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,textDecoration:"none",transition:"color 0.2s"}}
           onMouseEnter={e=>e.target.style.color="#00ff41"}
