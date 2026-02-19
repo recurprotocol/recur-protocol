@@ -158,7 +158,7 @@ const StatusDot = ({status}) => {
 
 /* ── NAV ── */
 function Nav({page, setPage, apiOnline}) {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [dropOpen, setDropOpen] = useState(false);
 
   return (
     <nav style={{
@@ -176,17 +176,89 @@ function Nav({page, setPage, apiOnline}) {
       <div style={{width:1,height:20,background:"var(--border)"}}/>
 
       {/* Nav links */}
-      <div style={{display:"flex",gap:4,flex:1}}>
-        {[["landing","HOME"],["dashboard","LIVE DASHBOARD"]].map(([pg,label])=>(
-          <button key={pg} onClick={()=>setPage(pg)} style={{
+      <div style={{display:"flex",gap:4,flex:1,alignItems:"center",position:"relative"}}>
+        {/* HOME */}
+        <button onClick={()=>setPage("landing")} style={{
+          fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",
+          cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
+          background:"transparent",
+          color:page==="landing"?"#ffffff":"var(--text-d)",
+          borderBottom:page==="landing"?"2px solid rgba(0,255,65,0.6)":"2px solid transparent",
+          transition:"all 0.2s",
+        }}>HOME</button>
+
+        {/* PROTOCOL dropdown */}
+        <div style={{position:"relative"}}
+          onMouseEnter={()=>setDropOpen(true)}
+          onMouseLeave={()=>setDropOpen(false)}>
+          <button style={{
             fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",
             cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
-            background:page===pg?"rgba(0,255,65,0.1)":"transparent",
-            color:page===pg?"#ffffff":"var(--text-d)",
-            borderBottom:page===pg?"2px solid #00ff41":"2px solid transparent",
-            transition:"all 0.2s",
-          }}>{label}</button>
-        ))}
+            background:"transparent",
+            color:(page==="dashboard"||dropOpen)?"#ffffff":"var(--text-d)",
+            borderBottom:(page==="dashboard"||dropOpen)?"2px solid rgba(0,255,65,0.6)":"2px solid transparent",
+            transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,
+          }}>
+            PROTOCOL <span style={{fontSize:8,opacity:0.6}}>{dropOpen?"▲":"▼"}</span>
+          </button>
+
+          {dropOpen && (
+            <div style={{
+              position:"absolute",top:"100%",left:0,
+              background:"rgba(1,2,4,0.98)",
+              border:"1px solid var(--border)",
+              borderTop:"none",
+              minWidth:260,
+              zIndex:2000,
+            }}>
+              {/* Live Threat Dashboard */}
+              <div onClick={()=>{setPage("dashboard");setDropOpen(false);}} style={{
+                padding:"12px 16px",cursor:"pointer",
+                borderBottom:"1px solid var(--border-b)",
+                display:"flex",justifyContent:"space-between",alignItems:"center",
+                transition:"background 0.15s",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,255,65,0.05)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <div>
+                  <div style={{fontFamily:"'Fira Code',monospace",fontSize:10,color:"#ffffff",letterSpacing:1}}>LIVE THREAT DASHBOARD</div>
+                  <div style={{fontSize:9,color:"var(--text-d)",marginTop:2}}>Real-time sentinel monitoring</div>
+                </div>
+                <span style={{fontSize:9,color:"#00ff41",letterSpacing:1,padding:"2px 6px",
+                  background:"rgba(0,255,65,0.1)",border:"1px solid rgba(0,255,65,0.3)"}}>LIVE</span>
+              </div>
+
+              {/* Staking */}
+              <div style={{
+                padding:"12px 16px",
+                borderBottom:"1px solid var(--border-b)",
+                display:"flex",justifyContent:"space-between",alignItems:"center",
+                opacity:0.5,cursor:"default",
+              }}>
+                <div>
+                  <div style={{fontFamily:"'Fira Code',monospace",fontSize:10,color:"#ffffff",letterSpacing:1}}>STAKING</div>
+                  <div style={{fontSize:9,color:"var(--text-d)",marginTop:2}}>Run sentinel nodes, earn from the network</div>
+                </div>
+                <span style={{fontSize:9,color:"#ffc300",letterSpacing:1,padding:"2px 6px",
+                  background:"rgba(255,195,0,0.08)",border:"1px solid rgba(255,195,0,0.3)"}}>SOON</span>
+              </div>
+
+              {/* On-Chain Attestation */}
+              <div style={{
+                padding:"12px 16px",
+                display:"flex",justifyContent:"space-between",alignItems:"center",
+                opacity:0.5,cursor:"default",
+              }}>
+                <div>
+                  <div style={{fontFamily:"'Fira Code',monospace",fontSize:10,color:"#ffffff",letterSpacing:1}}>ON-CHAIN ATTESTATION</div>
+                  <div style={{fontSize:9,color:"var(--text-d)",marginTop:2}}>ZK proofs committed to Solana</div>
+                </div>
+                <span style={{fontSize:9,color:"#ffc300",letterSpacing:1,padding:"2px 6px",
+                  background:"rgba(255,195,0,0.08)",border:"1px solid rgba(255,195,0,0.3)"}}>SOON</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Network status */}
