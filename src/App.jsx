@@ -422,13 +422,6 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
       {/* ── CTA ── */}
       <section style={{borderTop:"1px solid var(--border)",padding:"80px 64px",
         textAlign:"center",background:"rgba(0,255,65,0.01)"}}>
-        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:56,letterSpacing:6,
-          color:"#ffffff",marginBottom:16,textShadow:"0 0 50px rgba(0,255,65,0.25)"}}>
-          SEE IT IN ACTION
-        </h2>
-        <p style={{fontSize:11,color:"var(--text-d)",marginBottom:44,letterSpacing:1,lineHeight:1.8}}>
-          The live dashboard shows real-time threat detection, sentinel activity, and on-chain attestations.
-        </p>
         <button onClick={()=>setPage("dashboard")} style={{
           fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:6,
           padding:"18px 68px",background:"rgba(0,255,65,0.1)",color:"#ffffff",
