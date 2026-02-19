@@ -182,7 +182,7 @@ function Nav({page, setPage, apiOnline}) {
             fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",
             cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
             background:page===pg?"rgba(0,255,65,0.1)":"transparent",
-            color:page===pg?"#00ff41":"var(--text-d)",
+            color:page===pg?"#ffffff":"var(--text-d)",
             borderBottom:page===pg?"2px solid #00ff41":"2px solid transparent",
             transition:"all 0.2s",
           }}>{label}</button>
@@ -197,7 +197,7 @@ function Nav({page, setPage, apiOnline}) {
           boxShadow:apiOnline?"0 0 10px #00ff41":"0 0 10px #ffc300",
           animation:"pulse-green 2s infinite",
         }}/>
-        <span style={{color:apiOnline?"#00ff41":"#ffc300",letterSpacing:1}}>
+        <span style={{color:apiOnline?"#ffffff":"#ffc300",letterSpacing:1}}>
           {apiOnline?"SENTINEL NETWORK ONLINE":"SENTINEL DEMO MODE"}
         </span>
       </div>
@@ -207,7 +207,7 @@ function Nav({page, setPage, apiOnline}) {
         <button onClick={()=>setPage("dashboard")} style={{
           fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:3,
           padding:"8px 20px",flexShrink:0,
-          background:"rgba(0,255,65,0.1)",color:"#00ff41",
+          background:"rgba(0,255,65,0.1)",color:"#ffffff",
           border:"1px solid rgba(0,255,65,0.4)",cursor:"pointer",transition:"all 0.2s",
         }}
         onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 20px rgba(0,255,65,0.15)"}}
@@ -279,19 +279,23 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
           animation:"fade-up 0.7s ease 0.4s both",opacity:0}}>
           <button onClick={()=>setPage("dashboard")} style={{
             fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:4,
-            padding:"14px 44px",background:"rgba(0,255,65,0.1)",color:"#00ff41",
+            padding:"14px 44px",background:"rgba(0,255,65,0.1)",color:"#ffffff",
             border:"1px solid rgba(0,255,65,0.45)",cursor:"pointer",transition:"all 0.25s"}}
             onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 40px rgba(0,255,65,0.2)"}}
             onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.1)";e.target.style.boxShadow="none"}}>
             VIEW LIVE DASHBOARD
           </button>
-          <a href="/RECUR-Protocol-Whitepaper.pdf" target="_blank" rel="noreferrer" style={{
+          <a href="https://github.com/luxioxau/recur-protocol" target="_blank" rel="noreferrer" style={{
             fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:4,padding:"14px 44px",
             background:"transparent",color:"var(--text-d)",border:"1px solid var(--border)",
             textDecoration:"none",display:"flex",alignItems:"center",transition:"color 0.2s"}}
-            onMouseEnter={e=>e.currentTarget.style.color="#00ff41"}
+            onMouseEnter={e=>e.currentTarget.style.color="#ffffff"}
             onMouseLeave={e=>e.currentTarget.style.color="var(--text-d)"}>
-            WHITEPAPER ↗
+            GITHUB ↗
+          </a>
+        </div>
+
+        <div style={{position:"absolute",bottom:28,fontSize:9,color:"var(--text-d)",
           letterSpacing:4,animation:"fade-up 1s ease 1.4s both",opacity:0}}>SCROLL ↓</div>
       </section>
 
@@ -302,7 +306,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
           .map((s,i)=>(
           <div key={i} style={{padding:"32px 24px",textAlign:"center",
             borderRight:i<3?"1px solid var(--border)":"none"}}>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:48,color:"#00ff41",
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:48,color:"#ffffff",
               textShadow:"0 0 24px rgba(0,255,65,0.4)",letterSpacing:3,lineHeight:1}}>{s.v}</div>
             <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:3,marginTop:6}}>{s.l}</div>
           </div>
@@ -312,7 +316,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
       {/* ── HOW IT WORKS ── */}
       <section style={{padding:"80px 64px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>HOW IT WORKS</div>
-        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#00ff41",marginBottom:48}}>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#ffffff",marginBottom:48}}>
           PROTECTION IN THREE LAYERS
         </h2>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:2,background:"var(--border)"}}>
@@ -325,7 +329,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:64,
                 color:"rgba(0,255,65,0.1)",letterSpacing:4,lineHeight:1,marginBottom:20}}>{s.n}</div>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:20,
-                letterSpacing:4,color:"#00ff41",marginBottom:14}}>{s.t}</div>
+                letterSpacing:4,color:"#ffffff",marginBottom:14}}>{s.t}</div>
               <div style={{fontSize:11,color:"var(--text-d)",lineHeight:1.85}}>{s.d}</div>
             </div>
           ))}
@@ -335,7 +339,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
       {/* ── FEATURES ── */}
       <section style={{padding:"0 64px 80px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>CAPABILITIES</div>
-        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#00ff41",marginBottom:44}}>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#ffffff",marginBottom:44}}>
           WHAT RECUR PROTECTS AGAINST
         </h2>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
@@ -345,7 +349,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
                 letterSpacing:2,marginBottom:14,border:"1px solid var(--border)",
                 display:"inline-block",padding:"3px 8px"}}>{f.icon}</div>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:3,
-                color:"#00ff41",marginBottom:10}}>{f.title}</div>
+                color:"#ffffff",marginBottom:10}}>{f.title}</div>
               <div style={{fontSize:10,color:"var(--text-d)",lineHeight:1.85}}>{f.desc}</div>
             </Panel>
           ))}
@@ -355,7 +359,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
       {/* ── INTEGRATION CODE ── */}
       <section style={{padding:"0 64px 80px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>INTEGRATION</div>
-        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#00ff41",marginBottom:32}}>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#ffffff",marginBottom:32}}>
           TWO MINUTES TO PROTECTED
         </h2>
         <Panel style={{overflow:"hidden"}}>
@@ -374,7 +378,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
       {/* ── SENTINEL PREVIEW ── */}
       <section style={{padding:"0 64px 80px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>ARCHITECTURE</div>
-        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#00ff41",marginBottom:36}}>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#ffffff",marginBottom:36}}>
           RECURSIVE SENTINEL TREE
         </h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:44,alignItems:"start"}}>
@@ -387,7 +391,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
             </p>
             <button onClick={()=>setPage("dashboard")} style={{
               fontFamily:"'Fira Code',monospace",fontSize:10,letterSpacing:2,
-              padding:"10px 22px",background:"transparent",color:"#00ff41",
+              padding:"10px 22px",background:"transparent",color:"#ffffff",
               border:"1px solid rgba(0,255,65,0.3)",cursor:"pointer",transition:"all 0.2s"}}
               onMouseEnter={e=>{e.target.style.borderColor="rgba(0,255,65,0.7)";e.target.style.background="rgba(0,255,65,0.05)"}}
               onMouseLeave={e=>{e.target.style.borderColor="rgba(0,255,65,0.3)";e.target.style.background="transparent"}}>
@@ -419,7 +423,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
       <section style={{borderTop:"1px solid var(--border)",padding:"80px 64px",
         textAlign:"center",background:"rgba(0,255,65,0.01)"}}>
         <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:56,letterSpacing:6,
-          color:"#00ff41",marginBottom:16,textShadow:"0 0 50px rgba(0,255,65,0.25)"}}>
+          color:"#ffffff",marginBottom:16,textShadow:"0 0 50px rgba(0,255,65,0.25)"}}>
           SEE IT IN ACTION
         </h2>
         <p style={{fontSize:11,color:"var(--text-d)",marginBottom:44,letterSpacing:1,lineHeight:1.8}}>
@@ -427,7 +431,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         </p>
         <button onClick={()=>setPage("dashboard")} style={{
           fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:6,
-          padding:"18px 68px",background:"rgba(0,255,65,0.1)",color:"#00ff41",
+          padding:"18px 68px",background:"rgba(0,255,65,0.1)",color:"#ffffff",
           border:"1px solid rgba(0,255,65,0.45)",cursor:"pointer",transition:"all 0.3s"}}
           onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 60px rgba(0,255,65,0.2)"}}
           onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.1)";e.target.style.boxShadow="none"}}>
@@ -442,10 +446,10 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
           RECUR PROTOCOL
         </div>
         <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>BUILT FOR SOLANA · {new Date().getFullYear()}</div>
-        <a href="/RECUR-Protocol-Whitepaper.pdf" target="_blank" rel="noreferrer"
+        <a href="https://github.com/luxioxau/recur-protocol" target="_blank" rel="noreferrer"
           style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,textDecoration:"none",transition:"color 0.2s"}}
-          onMouseEnter={e=>e.target.style.color="#00ff41"}
-          onMouseLeave={e=>e.target.style.color="var(--text-d)"}>WHITEPAPER ↗</a>
+          onMouseEnter={e=>e.target.style.color="#ffffff"}
+          onMouseLeave={e=>e.target.style.color="var(--text-d)"}>GITHUB ↗</a>
       </footer>
     </div>
   );
@@ -480,7 +484,7 @@ function ThreatFeedPanel({threats}) {
               </div>
               <div style={{textAlign:"right"}}>
                 {t.blocked
-                  ?<span style={{fontSize:9,color:"#00ff41",padding:"1px 5px",background:"rgba(0,255,65,0.1)",border:"1px solid rgba(0,255,65,0.3)"}}>BLOCKED</span>
+                  ?<span style={{fontSize:9,color:"#ffffff",padding:"1px 5px",background:"rgba(0,255,65,0.1)",border:"1px solid rgba(0,255,65,0.3)"}}>BLOCKED</span>
                   :<span style={{fontSize:9,color:"#ff0033",padding:"1px 5px",background:"rgba(255,0,51,0.1)",border:"1px solid rgba(255,0,51,0.3)",animation:"pulse-red 1.5s infinite"}}>BREACH</span>}
               </div>
             </div>
@@ -508,11 +512,11 @@ function AgentTreePanel() {
               <div style={{fontSize:9,color:"var(--text-d)",marginTop:1}}>{s.role}</div>
             </div>
             <div style={{textAlign:"right",fontSize:9}}>
-              <div style={{color:"var(--text-d)"}}>GEN <span style={{color:"var(--green)"}}>{s.gen}</span></div>
+              <div style={{color:"var(--text-d)"}}>GEN <span style={{color:"#ffffff"}}>{s.gen}</span></div>
               <div style={{color:"var(--text-d)"}}>MUT <span style={{color:s.mutations>100?"#ffc300":"var(--green)"}}>{s.mutations}</span></div>
             </div>
             <div style={{fontSize:9,padding:"2px 6px",letterSpacing:1,
-              color:s.status==="ACTIVE"?"#00ff41":s.status==="EVOLVING"?"#ffc300":"#00b4d8",
+              color:s.status==="ACTIVE"?"#ffffff":s.status==="EVOLVING"?"#ffc300":"#00b4d8",
               background:s.status==="ACTIVE"?"rgba(0,255,65,0.08)":s.status==="EVOLVING"?"rgba(255,195,0,0.08)":"rgba(0,180,216,0.08)",
               border:`1px solid ${s.status==="ACTIVE"?"rgba(0,255,65,0.2)":s.status==="EVOLVING"?"rgba(255,195,0,0.2)":"rgba(0,180,216,0.2)"}`}}>{s.status}</div>
           </div>
@@ -528,7 +532,7 @@ function VulnPanel() {
       <PanelHeader title="VULNERABILITY ASSESSMENT" sub="LIVE SECURITY POSTURE SCAN" right="LAST: 00:00:42"/>
       <div style={{flex:1,overflow:"auto",padding:"10px 12px",display:"flex",flexDirection:"column",gap:8}}>
         {VULN_CATEGORIES.map((v,i)=>{
-          const color=v.score>=90?"#00ff41":v.score>=75?"#ffc300":"#ff6b00";
+          const color=v.score>=90?"#ffffff":v.score>=75?"#ffc300":"#ff6b00";
           return (
             <div key={i}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4,alignItems:"flex-end"}}>
@@ -545,7 +549,7 @@ function VulnPanel() {
                   boxShadow:`0 0 8px ${color}66`,transition:"width 1s ease"}}/>
               </div>
               <div style={{fontSize:9,color:"var(--text-d)"}}>
-                {v.passed}/{v.checks} checks passed · <span style={{color:v.critical>0?"#ff0033":v.passed<v.checks?"#ffc300":"#00ff41"}}>{v.checks-v.passed} failing</span>
+                {v.passed}/{v.checks} checks passed · <span style={{color:v.critical>0?"#ff0033":v.passed<v.checks?"#ffc300":"#ffffff"}}>{v.checks-v.passed} failing</span>
               </div>
             </div>
           );
@@ -599,7 +603,7 @@ function BlockchainLogPanel({attestations}) {
             display:"grid",gridTemplateColumns:"110px 1fr 100px",gap:8,alignItems:"center",animation:"data-in 0.3s ease"}}>
             <div style={{fontSize:9,color:"var(--text-d)",fontFamily:"'VT323',monospace"}}>{a.block}</div>
             <div style={{fontSize:9,color:"var(--text-d)"}}><span style={{color:"#00b4d8"}}>{a.hash}</span> · {a.event}</div>
-            <div style={{fontSize:9,color:"#00ff41",textAlign:"right"}}>✓ NOTARIZED</div>
+            <div style={{fontSize:9,color:"#ffffff",textAlign:"right"}}>✓ NOTARIZED</div>
           </div>
         ))}
       </div>
@@ -630,11 +634,11 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
   },[apiOnline]);
 
   const metrics = [
-    {label:"SENTINEL GEN",    value:generation,                                       color:"#00ff41"},
+    {label:"SENTINEL GEN",    value:generation,                                       color:"#ffffff"},
     {label:"TOTAL MUTATIONS", value:mutations.toLocaleString(),                       color:"#ffc300"},
-    {label:"AGENTS ACTIVE",   value:"13",                                              color:"#00ff41"},
+    {label:"AGENTS ACTIVE",   value:"13",                                              color:"#ffffff"},
     {label:"ATTACKS TODAY",   value:(stats?.blocked??0).toLocaleString(),             color:"#ff6b00"},
-    {label:"BLOCK RATE",      value:stats?.total>0?`${stats.block_rate}%`:"—",        color:"#00ff41"},
+    {label:"BLOCK RATE",      value:stats?.total>0?`${stats.block_rate}%`:"—",        color:"#ffffff"},
     {label:"CHAIN",           value:"SOLANA",                                          color:"#00b4d8"},
   ];
 
@@ -672,7 +676,7 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
             fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",cursor:"pointer",
             letterSpacing:2,textTransform:"uppercase",border:"none",outline:"none",
             background:activeTab===tab?"rgba(0,255,65,0.12)":"transparent",
-            color:activeTab===tab?"#00ff41":"var(--text-d)",
+            color:activeTab===tab?"#ffffff":"var(--text-d)",
             borderBottom:activeTab===tab?"2px solid #00ff41":"2px solid transparent",
             transition:"all 0.2s"}}>{tab}</button>
         ))}
@@ -700,7 +704,7 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
               <div style={{flex:1,overflow:"auto",padding:"10px 12px",fontFamily:"'VT323',monospace",fontSize:14,color:"var(--text-d)",lineHeight:1.8}}>
                 {Array.from({length:30},(_,i)=>(
                   <div key={i} style={{animation:`data-in 0.3s ease ${i*0.03}s both`}}>
-                    <span style={{color:"var(--green)"}}>GEN-{generation}</span> &gt;{" "}
+                    <span style={{color:"#ffffff"}}>GEN-{generation}</span> &gt;{" "}
                     {["Adversarial pattern absorption complete","Novel jailbreak vector classified and sealed",
                       "Prompt boundary epsilon tightened -0.003","Canary token rotation: new set deployed",
                       "Role-play detection model updated","Context window leakage probe neutralised",
@@ -734,7 +738,7 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
                       <div style={{height:"100%",width:`${r.progress}%`,background:"linear-gradient(90deg,#00b4d8,#00ff41)",
                         borderRadius:2,transition:"width 2s ease",boxShadow:"0 0 8px rgba(0,255,65,0.5)"}}/>
                     </div>
-                    <div style={{fontSize:9,color:"#00ff41",marginTop:4}}>{r.progress}% patched</div>
+                    <div style={{fontSize:9,color:"#ffffff",marginTop:4}}>{r.progress}% patched</div>
                   </div>
                 ))}
               </div>
@@ -755,7 +759,7 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
                       <span style={{fontSize:9,color:"var(--text-d)"}}>{t.ts}</span>
                       <span style={{fontSize:9,color:def.color}}>{def.label.split(" ")[0]}</span>
                       <span style={{fontSize:9,color:"var(--text-d)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.target}</span>
-                      <span style={{fontSize:9,textAlign:"right",color:t.blocked?"#00ff41":"#ff0033"}}>{t.blocked?"BLOCKED":"BREACHED"}</span>
+                      <span style={{fontSize:9,textAlign:"right",color:t.blocked?"#ffffff":"#ff0033"}}>{t.blocked?"BLOCKED":"BREACHED"}</span>
                     </div>
                   );
                 })}
