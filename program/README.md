@@ -10,11 +10,11 @@ The RECUR staking program allows $RECUR token holders to stake and operate senti
 
 ## Node Tiers
 
-| Tier  | Minimum Stake  | Est. APY | Multiplier | Slots      |
-|-------|---------------|----------|------------|------------|
-| NANO  | 1,000 $RECUR  | ~8%      | 1.0x       | Unlimited  |
-| WARD  | 10,000 $RECUR | ~14%     | 1.75x      | 500        |
-| PRIME | 50,000 $RECUR | ~22%     | 2.75x      | 50         |
+| Tier  | Minimum Stake  | Multiplier | Slots      |
+|-------|---------------|------------|------------|
+| NANO  | 1,000 $RECUR  | 1.0x       | Unlimited  |
+| WARD  | 10,000 $RECUR | 1.75x      | 500        |
+| PRIME | 50,000 $RECUR | 2.75x      | 50         |
 
 ## Instructions
 
