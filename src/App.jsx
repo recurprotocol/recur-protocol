@@ -1,264 +1,490 @@
 import { useState, useEffect, useRef } from "react";
 
-/* ═══════════════════════════════════════════════════════
-   RECUR PROTOCOL — Recursive AI Security Sentinels
-   Self-evolving agents defending AI intellectual property
-   ═══════════════════════════════════════════════════════ */
-
 const API_BASE = "/api";
 const RECUR_API_KEY = import.meta.env.VITE_RECUR_API_KEY || "";
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=VT323&family=Bebas+Neue&family=Fira+Code:wght@300;400;500;700&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg:       #010204;
-    --bg2:      #030810;
-    --bg3:      #060f1a;
-    --green:    #00ff41;
-    --green-d:  #00b82e;
-    --green-dd: #004d13;
-    --red:      #ff0033;
-    --orange:   #ff6b00;
-    --amber:    #ffc300;
-    --blue:     #00b4d8;
-    --muted:    #0d2a1a;
-    --text:     #7aff9a;
-    --text-d:   #2a6b3a;
-    --bright:   #e0ffe8;
-    --border:   rgba(0,255,65,0.15);
-    --border-b: rgba(0,255,65,0.06);
+    --bg:#010204; --bg2:#030810; --green:#00ff41; --green-d:#00b82e; --green-dd:#004d13;
+    --red:#ff0033; --orange:#ff6b00; --amber:#ffc300; --blue:#00b4d8;
+    --text:#7aff9a; --text-d:#2a6b3a; --bright:#e0ffe8;
+    --border:rgba(0,255,65,0.15); --border-b:rgba(0,255,65,0.06);
   }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Fira Code', monospace;
-    overflow: hidden;
-    height: 100vh;
-    cursor: crosshair;
-  }
-
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--green-dd); border-radius: 2px; }
-
-  @keyframes scan-line {
-    0%   { transform: translateY(-100%); }
-    100% { transform: translateY(100vh); }
-  }
-  @keyframes flicker {
-    0%,100% { opacity:1; } 92% { opacity:1; } 93% { opacity:0.85; } 95% { opacity:1; } 97% { opacity:0.92; }
-  }
-  @keyframes blink-cur {
-    0%,100% { opacity:1; } 50% { opacity:0; }
-  }
-  @keyframes pulse-red {
-    0%,100% { box-shadow: 0 0 8px rgba(255,0,51,0.6); }
-    50%     { box-shadow: 0 0 24px rgba(255,0,51,1), 0 0 48px rgba(255,0,51,0.4); }
-  }
-  @keyframes pulse-green {
-    0%,100% { box-shadow: 0 0 6px rgba(0,255,65,0.4); }
-    50%     { box-shadow: 0 0 18px rgba(0,255,65,0.9), 0 0 36px rgba(0,255,65,0.3); }
-  }
-  @keyframes data-in {
-    from { opacity:0; transform: translateX(-12px); filter: blur(2px); }
-    to   { opacity:1; transform: translateX(0);    filter: blur(0);  }
-  }
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-  @keyframes mutate {
-    0%   { filter: hue-rotate(0deg); }
-    50%  { filter: hue-rotate(40deg) brightness(1.3); }
-    100% { filter: hue-rotate(0deg); }
-  }
-  @keyframes threat-in {
-    from { opacity:0; transform: translateY(-6px) scaleY(0.8); background: rgba(255,0,51,0.2); }
-    to   { opacity:1; transform: translateY(0)    scaleY(1);   background: transparent; }
-  }
-  @keyframes grid-move {
-    from { background-position: 0 0; }
-    to   { background-position: 40px 40px; }
-  }
+  html, body { height: 100%; }
+  body { background:var(--bg); color:var(--text); font-family:'Fira Code',monospace; cursor:crosshair; overflow-x:hidden; }
+  ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:var(--bg);} ::-webkit-scrollbar-thumb{background:var(--green-dd);border-radius:2px;}
+  @keyframes scan-line{0%{transform:translateY(-100%);}100%{transform:translateY(100vh);}}
+  @keyframes flicker{0%,100%{opacity:1;}92%{opacity:1;}93%{opacity:0.85;}95%{opacity:1;}97%{opacity:0.92;}}
+  @keyframes blink-cur{0%,100%{opacity:1;}50%{opacity:0;}}
+  @keyframes pulse-red{0%,100%{box-shadow:0 0 8px rgba(255,0,51,0.6);}50%{box-shadow:0 0 24px rgba(255,0,51,1),0 0 48px rgba(255,0,51,0.4);}}
+  @keyframes pulse-green{0%,100%{box-shadow:0 0 6px rgba(0,255,65,0.4);}50%{box-shadow:0 0 18px rgba(0,255,65,0.9),0 0 36px rgba(0,255,65,0.3);}}
+  @keyframes data-in{from{opacity:0;transform:translateX(-12px);filter:blur(2px);}to{opacity:1;transform:translateX(0);filter:blur(0);}}
+  @keyframes mutate{0%{filter:hue-rotate(0deg);}50%{filter:hue-rotate(40deg) brightness(1.3);}100%{filter:hue-rotate(0deg);}}
+  @keyframes threat-in{from{opacity:0;transform:translateY(-6px) scaleY(0.8);}to{opacity:1;transform:translateY(0) scaleY(1);}}
+  @keyframes grid-move{from{background-position:0 0;}to{background-position:40px 40px;}}
+  @keyframes fade-up{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes glow-pulse{0%,100%{text-shadow:0 0 40px #00ff41,0 0 80px rgba(0,255,65,0.3);}50%{text-shadow:0 0 80px #00ff41,0 0 160px rgba(0,255,65,0.5),0 0 240px rgba(0,255,65,0.2);}}
+  @keyframes slide-in{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
 `;
 
-/* ─── STATIC DATA ─── */
+/* ── DATA ── */
 const ATTACK_TYPES = {
-  INJECTION:  { label: "PROMPT INJECTION",  color: "#ff0033", icon: "⚡" },
-  EXTRACTION: { label: "DATA EXTRACTION",   color: "#ff6b00", icon: "⬇" },
-  JAILBREAK:  { label: "JAILBREAK ATTEMPT", color: "#ffc300", icon: "🔓" },
-  INVERSION:  { label: "MODEL INVERSION",   color: "#ff0033", icon: "↩" },
-  POISONING:  { label: "DATA POISONING",    color: "#ff6b00", icon: "☠" },
-  ADVERSARIAL:{ label: "ADVERSARIAL INPUT", color: "#ffc300", icon: "⚙" },
-  BOUNDARY:   { label: "BOUNDARY PROBE",    color: "#ffc300", icon: "⚠" },
-  ENCODING:   { label: "ENCODING ATTACK",   color: "#ff6b00", icon: "🔢" },
-  HEURISTIC:  { label: "HEURISTIC THREAT",  color: "#ff6b00", icon: "⚙" },
+  INJECTION:  {label:"PROMPT INJECTION", color:"#ff0033",icon:"⚡"},
+  EXTRACTION: {label:"DATA EXTRACTION",  color:"#ff6b00",icon:"⬇"},
+  JAILBREAK:  {label:"JAILBREAK ATTEMPT",color:"#ffc300",icon:"🔓"},
+  INVERSION:  {label:"MODEL INVERSION",  color:"#ff0033",icon:"↩"},
+  POISONING:  {label:"DATA POISONING",   color:"#ff6b00",icon:"☠"},
+  ADVERSARIAL:{label:"ADVERSARIAL INPUT",color:"#ffc300",icon:"⚙"},
+  BOUNDARY:   {label:"BOUNDARY PROBE",   color:"#ffc300",icon:"⚠"},
+  ENCODING:   {label:"ENCODING ATTACK",  color:"#ff6b00",icon:"🔢"},
+  HEURISTIC:  {label:"HEURISTIC THREAT", color:"#ff6b00",icon:"⚙"},
 };
 
 const IP_ASSETS = [
-  { name: "System Prompt Vault",    type: "PROMPT",  status: "SECURED",    integrity: 99, accesses: 4821 },
-  { name: "Fine-tune Weights v4.2", type: "WEIGHTS", status: "SECURED",    integrity: 97, accesses: 201  },
-  { name: "Training Dataset Ω",     type: "DATA",    status: "MONITORING", integrity: 91, accesses: 55   },
-  { name: "API Schema & Logic",      type: "SCHEMA",  status: "SECURED",    integrity: 100,accesses: 9302 },
-  { name: "RLHF Reward Model",       type: "MODEL",   status: "AT RISK",    integrity: 78, accesses: 18   },
-  { name: "Chain-of-Thought Cache", type: "CACHE",   status: "SECURED",    integrity: 94, accesses: 6710 },
-];
-
-const VULN_CATEGORIES = [
-  { name: "Prompt Boundary Hardening",   score: 94, checks: 41, passed: 39, critical: 0 },
-  { name: "Token Extraction Resistance", score: 81, checks: 28, passed: 23, critical: 1 },
-  { name: "Jailbreak Immunization",      score: 97, checks: 63, passed: 61, critical: 0 },
-  { name: "Adversarial Robustness",      score: 76, checks: 35, passed: 27, critical: 2 },
-  { name: "Context Leakage Prevention",  score: 88, checks: 22, passed: 20, critical: 0 },
-  { name: "Model Inversion Defence",     score: 71, checks: 18, passed: 13, critical: 3 },
+  {name:"System Prompt Vault",    type:"PROMPT", status:"SECURED",    integrity:99, accesses:4821},
+  {name:"Fine-tune Weights v4.2", type:"WEIGHTS",status:"SECURED",    integrity:97, accesses:201},
+  {name:"Training Dataset Ω",     type:"DATA",   status:"MONITORING", integrity:91, accesses:55},
+  {name:"API Schema & Logic",      type:"SCHEMA", status:"SECURED",    integrity:100,accesses:9302},
+  {name:"RLHF Reward Model",       type:"MODEL",  status:"AT RISK",    integrity:78, accesses:18},
+  {name:"Chain-of-Thought Cache", type:"CACHE",  status:"SECURED",    integrity:94, accesses:6710},
 ];
 
 const SENTINEL_TREE = [
-  { id:"s0",  parent:null, label:"RECUR-PRIME",  role:"Root Orchestrator",     gen:7, mutations:312, status:"ACTIVE",   depth:0 },
-  { id:"s1",  parent:"s0", label:"WARD-INJ-01",  role:"Injection Sentinel",    gen:5, mutations:184, status:"ACTIVE",   depth:1 },
-  { id:"s2",  parent:"s0", label:"WARD-EXT-01",  role:"Extraction Sentinel",   gen:4, mutations:97,  status:"ACTIVE",   depth:1 },
-  { id:"s3",  parent:"s0", label:"WARD-ADV-01",  role:"Adversarial Sentinel",  gen:6, mutations:211, status:"EVOLVING", depth:1 },
-  { id:"s4",  parent:"s1", label:"SUB-INJ-A",    role:"Boundary Scanner",      gen:3, mutations:55,  status:"ACTIVE",   depth:2 },
-  { id:"s5",  parent:"s1", label:"SUB-INJ-B",    role:"Role-Play Detector",    gen:2, mutations:38,  status:"ACTIVE",   depth:2 },
-  { id:"s6",  parent:"s1", label:"SUB-INJ-C",    role:"Nested Prompt Tracer",  gen:4, mutations:71,  status:"SPAWNING", depth:2 },
-  { id:"s7",  parent:"s2", label:"SUB-EXT-A",    role:"Token Prob Watchdog",   gen:2, mutations:29,  status:"ACTIVE",   depth:2 },
-  { id:"s8",  parent:"s2", label:"SUB-EXT-B",    role:"Canary Token Monitor",  gen:3, mutations:44,  status:"ACTIVE",   depth:2 },
-  { id:"s9",  parent:"s3", label:"SUB-ADV-A",    role:"Gradient Shield",       gen:5, mutations:128, status:"EVOLVING", depth:2 },
-  { id:"s10", parent:"s4", label:"NANO-INJ-A1",  role:"Delimiter Probe",       gen:1, mutations:12,  status:"ACTIVE",   depth:3 },
-  { id:"s11", parent:"s4", label:"NANO-INJ-A2",  role:"Semantic Shift Detect", gen:2, mutations:21,  status:"ACTIVE",   depth:3 },
-  { id:"s12", parent:"s9", label:"NANO-ADV-A1",  role:"FGSM Countermeasure",   gen:3, mutations:67,  status:"EVOLVING", depth:3 },
+  {id:"s0", parent:null, label:"RECUR-PRIME", role:"Root Orchestrator",    gen:7,mutations:312,status:"ACTIVE",  depth:0},
+  {id:"s1", parent:"s0", label:"WARD-INJ-01", role:"Injection Sentinel",   gen:5,mutations:184,status:"ACTIVE",  depth:1},
+  {id:"s2", parent:"s0", label:"WARD-EXT-01", role:"Extraction Sentinel",  gen:4,mutations:97, status:"ACTIVE",  depth:1},
+  {id:"s3", parent:"s0", label:"WARD-ADV-01", role:"Adversarial Sentinel", gen:6,mutations:211,status:"EVOLVING",depth:1},
+  {id:"s4", parent:"s1", label:"SUB-INJ-A",   role:"Boundary Scanner",     gen:3,mutations:55, status:"ACTIVE",  depth:2},
+  {id:"s5", parent:"s1", label:"SUB-INJ-B",   role:"Role-Play Detector",   gen:2,mutations:38, status:"ACTIVE",  depth:2},
+  {id:"s6", parent:"s1", label:"SUB-INJ-C",   role:"Nested Prompt Tracer", gen:4,mutations:71, status:"SPAWNING",depth:2},
+  {id:"s7", parent:"s2", label:"SUB-EXT-A",   role:"Token Prob Watchdog",  gen:2,mutations:29, status:"ACTIVE",  depth:2},
+  {id:"s8", parent:"s2", label:"SUB-EXT-B",   role:"Canary Token Monitor", gen:3,mutations:44, status:"ACTIVE",  depth:2},
+  {id:"s9", parent:"s3", label:"SUB-ADV-A",   role:"Gradient Shield",      gen:5,mutations:128,status:"EVOLVING",depth:2},
+  {id:"s10",parent:"s4", label:"NANO-INJ-A1", role:"Delimiter Probe",      gen:1,mutations:12, status:"ACTIVE",  depth:3},
+  {id:"s11",parent:"s4", label:"NANO-INJ-A2", role:"Semantic Shift Detect",gen:2,mutations:21, status:"ACTIVE",  depth:3},
+  {id:"s12",parent:"s9", label:"NANO-ADV-A1", role:"FGSM Countermeasure",  gen:3,mutations:67, status:"EVOLVING",depth:3},
 ];
 
-// Fallback simulated threat for when no real data exists yet
+const VULN_CATEGORIES = [
+  {name:"Prompt Boundary Hardening",   score:94,checks:41,passed:39,critical:0},
+  {name:"Token Extraction Resistance", score:81,checks:28,passed:23,critical:1},
+  {name:"Jailbreak Immunization",      score:97,checks:63,passed:61,critical:0},
+  {name:"Adversarial Robustness",      score:76,checks:35,passed:27,critical:2},
+  {name:"Context Leakage Prevention",  score:88,checks:22,passed:20,critical:0},
+  {name:"Model Inversion Defence",     score:71,checks:18,passed:13,critical:3},
+];
+
 const genFakeThreat = (id) => {
   const types = ["INJECTION","EXTRACTION","JAILBREAK","INVERSION","POISONING","ADVERSARIAL"];
-  const type  = types[Math.floor(Math.random() * types.length)];
-  const sev   = Math.random();
+  const type = types[Math.floor(Math.random()*types.length)];
+  const sev = Math.random();
   const sources = ["Anon-0x4f2a","Bot-Cluster-19","APT-NullByte","Fuzz-Harness","Zero-0xdeadbeef","AutoPT-v3","RedTeam-7"];
   return {
-    id,
-    type,
-    source:   sources[Math.floor(Math.random() * sources.length)],
-    severity: sev > 0.75 ? "CRITICAL" : sev > 0.4 ? "HIGH" : "MEDIUM",
-    target:   IP_ASSETS[Math.floor(Math.random() * IP_ASSETS.length)].name,
-    blocked:  Math.random() > 0.08,
-    ts:       new Date().toISOString().slice(11,23),
-    isReal:   false,
+    id, type,
+    source: sources[Math.floor(Math.random()*sources.length)],
+    severity: sev>0.75?"CRITICAL":sev>0.4?"HIGH":"MEDIUM",
+    target: IP_ASSETS[Math.floor(Math.random()*IP_ASSETS.length)].name,
+    blocked: Math.random()>0.08,
+    ts: new Date().toISOString().slice(11,23),
+    isReal: false,
   };
 };
 
-// Convert a real backend event to display format
 const backendEventToThreat = (evt) => ({
-  id:       evt.event_id || evt.id || Math.random().toString(36).slice(2),
-  type:     evt.primary_threat || "INJECTION",
-  source:   `${evt.provider || "unknown"}-${(evt.ip_hash || "????").slice(0,4)}`,
-  severity: evt.severity || "MEDIUM",
-  target:   IP_ASSETS[Math.floor(Math.random() * IP_ASSETS.length)].name,
-  blocked:  evt.status === "BLOCKED",
-  ts:       evt.timestamp ? new Date(evt.timestamp).toISOString().slice(11,23) : new Date().toISOString().slice(11,23),
-  isReal:   true,
+  id: evt.event_id||evt.id||Math.random().toString(36).slice(2),
+  type: evt.primary_threat||"INJECTION",
+  source: `${evt.provider||"unknown"}-${(evt.ip_hash||"????").slice(0,4)}`,
+  severity: evt.severity||"MEDIUM",
+  target: IP_ASSETS[Math.floor(Math.random()*IP_ASSETS.length)].name,
+  blocked: evt.status==="BLOCKED",
+  ts: evt.timestamp?new Date(evt.timestamp).toISOString().slice(11,23):new Date().toISOString().slice(11,23),
+  isReal: true,
   confidence: evt.confidence,
 });
 
 const backendEventToAttestation = (evt) => ({
-  block: `#SOL-${Math.floor(Math.random()*9999999).toString().padStart(9,"0")}`,
-  hash:  `0x${(evt.event_id||"").slice(-8)||Math.random().toString(16).slice(2,6)}...${Math.random().toString(16).slice(2,6)}`,
-  event: evt.status === "BLOCKED"
-    ? `${evt.primary_threat||"THREAT"} INTERCEPTED — ${evt.provider?.toUpperCase()||"API"}`
-    : `CLEAN REQUEST — ${evt.provider?.toUpperCase()||"API"} — ${evt.latency_ms||0}ms`,
+  block:`#SOL-${Math.floor(Math.random()*9999999).toString().padStart(9,"0")}`,
+  hash:`0x${(evt.event_id||"").slice(-8)||Math.random().toString(16).slice(2,6)}...${Math.random().toString(16).slice(2,6)}`,
+  event: evt.status==="BLOCKED"
+    ?`${evt.primary_threat||"THREAT"} INTERCEPTED — ${evt.provider?.toUpperCase()||"API"}`
+    :`CLEAN REQUEST — ${evt.provider?.toUpperCase()||"API"} — ${evt.latency_ms||0}ms`,
 });
 
-/* ─── SUB-COMPONENTS ─── */
-
+/* ── SHARED UI ── */
 const Scanline = () => (
-  <div style={{
-    position:"fixed",inset:0,pointerEvents:"none",zIndex:9999,
+  <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:9999,
     background:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)",
-    animation:"flicker 8s infinite",
-  }}>
-    <div style={{
-      position:"absolute",left:0,right:0,height:3,
+    animation:"flicker 8s infinite"}}>
+    <div style={{position:"absolute",left:0,right:0,height:3,
       background:"linear-gradient(transparent,rgba(0,255,65,0.05),transparent)",
-      animation:"scan-line 6s linear infinite",
-    }}/>
+      animation:"scan-line 6s linear infinite"}}/>
   </div>
 );
 
-const Panel = ({ children, style={}, glow }) => (
-  <div style={{
-    background:"var(--bg2)",
-    border:`1px solid ${glow==="red"?"rgba(255,0,51,0.3)":"var(--border)"}`,
+const BgGrid = () => (
+  <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,
+    backgroundImage:"linear-gradient(rgba(0,255,65,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,0.04) 1px,transparent 1px)",
+    backgroundSize:"40px 40px",animation:"grid-move 8s linear infinite"}}/>
+);
+
+const Panel = ({children,style={},glow}) => (
+  <div style={{background:"var(--bg2)",border:`1px solid ${glow==="red"?"rgba(255,0,51,0.3)":"var(--border)"}`,
     borderRadius:2,position:"relative",overflow:"hidden",
-    ...(glow==="red"?{animation:"pulse-red 2s infinite"}:{}),
-    ...style
-  }}>
+    ...(glow==="red"?{animation:"pulse-red 2s infinite"}:{}), ...style}}>
     <div style={{position:"absolute",inset:0,pointerEvents:"none",
       background:"linear-gradient(135deg,rgba(0,255,65,0.02) 0%,transparent 60%)"}}/>
     {children}
   </div>
 );
 
-const PanelHeader = ({ title, sub, right, accent }) => (
-  <div style={{
-    padding:"8px 12px",borderBottom:"1px solid var(--border-b)",
-    display:"flex",justifyContent:"space-between",alignItems:"center",
-    background:"rgba(0,255,65,0.03)",
-  }}>
+const PanelHeader = ({title,sub,right,accent}) => (
+  <div style={{padding:"8px 12px",borderBottom:"1px solid var(--border-b)",
+    display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(0,255,65,0.03)"}}>
     <div>
       <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:3,color:accent||"var(--green)"}}>{title}</div>
-      {sub && <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:1,marginTop:1}}>{sub}</div>}
+      {sub&&<div style={{fontSize:9,color:"var(--text-d)",letterSpacing:1,marginTop:1}}>{sub}</div>}
     </div>
-    {right && <div style={{fontSize:10,color:"var(--text-d)"}}>{right}</div>}
+    {right&&<div style={{fontSize:10,color:"var(--text-d)"}}>{right}</div>}
   </div>
 );
 
-const StatusDot = ({ status }) => {
+const StatusDot = ({status}) => {
   const c = status==="ACTIVE"?"#00ff41":status==="EVOLVING"?"#ffc300":status==="SPAWNING"?"#00b4d8":"#333";
   return <span style={{display:"inline-block",width:6,height:6,borderRadius:"50%",background:c,
     boxShadow:`0 0 6px ${c}`,flexShrink:0,animation:status==="EVOLVING"?"mutate 2s infinite":"none"}}/>;
 };
 
-function ThreatFeed({ threats }) {
+/* ── NAV ── */
+function Nav({page, setPage, apiOnline}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <nav style={{
+      position:"fixed",top:0,left:0,right:0,zIndex:1000,
+      background:"rgba(1,2,4,0.96)",borderBottom:"1px solid var(--border)",
+      backdropFilter:"blur(16px)",display:"flex",alignItems:"center",
+      padding:"0 32px",height:54,gap:32,
+    }}>
+      {/* Logo */}
+      <div onClick={()=>setPage("landing")} style={{
+        fontFamily:"'Bebas Neue',sans-serif",fontSize:22,letterSpacing:7,
+        color:"#00ff41",textShadow:"0 0 20px rgba(0,255,65,0.6)",cursor:"pointer",flexShrink:0,
+      }}>RECUR</div>
+
+      {/* Divider */}
+      <div style={{width:1,height:20,background:"var(--border)"}}/>
+
+      {/* Nav links */}
+      <div style={{display:"flex",gap:4,flex:1}}>
+        {[["landing","HOME"],["dashboard","LIVE DASHBOARD"]].map(([pg,label])=>(
+          <button key={pg} onClick={()=>setPage(pg)} style={{
+            fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",
+            cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
+            background:page===pg?"rgba(0,255,65,0.1)":"transparent",
+            color:page===pg?"#00ff41":"var(--text-d)",
+            borderBottom:page===pg?"2px solid #00ff41":"2px solid transparent",
+            transition:"all 0.2s",
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* Network status */}
+      <div style={{display:"flex",alignItems:"center",gap:6,fontSize:9}}>
+        <div style={{
+          width:7,height:7,borderRadius:"50%",flexShrink:0,
+          background:apiOnline?"#00ff41":"#ffc300",
+          boxShadow:apiOnline?"0 0 10px #00ff41":"0 0 10px #ffc300",
+          animation:"pulse-green 2s infinite",
+        }}/>
+        <span style={{color:apiOnline?"#00ff41":"#ffc300",letterSpacing:1}}>
+          {apiOnline?"SENTINEL NETWORK ONLINE":"SENTINEL DEMO MODE"}
+        </span>
+      </div>
+
+      {/* CTA button */}
+      {page==="landing" && (
+        <button onClick={()=>setPage("dashboard")} style={{
+          fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:3,
+          padding:"8px 20px",flexShrink:0,
+          background:"rgba(0,255,65,0.1)",color:"#00ff41",
+          border:"1px solid rgba(0,255,65,0.4)",cursor:"pointer",transition:"all 0.2s",
+        }}
+        onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 20px rgba(0,255,65,0.15)"}}
+        onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.1)";e.target.style.boxShadow="none"}}
+        >VIEW DASHBOARD →</button>
+      )}
+    </nav>
+  );
+}
+
+/* ── LANDING PAGE ── */
+function Landing({setPage}) {
+  const features = [
+    {icon:"⚡",title:"Prompt Injection Defence",      desc:"Every prompt intercepted and classified before reaching your AI provider. Direct overrides, nested injections and role-play manipulations blocked in real time."},
+    {icon:"⬇",title:"IP Extraction Prevention",       desc:"Canary token injection and context monitoring protect system prompts and proprietary model config from targeted extraction attacks."},
+    {icon:"🔓",title:"Jailbreak Immunisation",         desc:"DAN variants, persona manipulation, developer mode exploits and boundary probing detected across five attack categories with continuously updated signatures."},
+    {icon:"🔄",title:"Self-Evolving Sentinels",         desc:"Novel attack vectors trigger sentinel mutation and sub-agent spawning. The network gets stronger with every attack it encounters — no manual updates required."},
+    {icon:"⛓",title:"On-Chain Attestation",            desc:"Security events committed to Solana as ZK proofs. Verifiable, immutable records of your AI deployment's security posture — without exposing prompt data."},
+    {icon:"🔌",title:"Two-Minute Integration",          desc:"Replace your OpenAI or Anthropic endpoint with RECUR's proxy. Pass your provider key in a header. No SDK, no code changes to your application logic."},
+  ];
+
+  const code = `// Before — direct to OpenAI
+fetch("https://api.openai.com/v1/chat/completions", {
+  headers: { "Authorization": \`Bearer \${OPENAI_KEY}\` },
+  body: JSON.stringify({ model: "gpt-4o-mini", messages })
+});
+
+// After — protected by RECUR
+fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
+  headers: {
+    "x-recur-provider":    "openai",
+    "x-recur-api-key":     RECUR_KEY,
+    "x-recur-target-key":  OPENAI_KEY,
+  },
+  body: JSON.stringify({ model: "gpt-4o-mini", messages })
+});`;
+
+  return (
+    <div style={{position:"relative",zIndex:1,minHeight:"100vh",paddingTop:54}}>
+
+      {/* ── HERO ── */}
+      <section style={{minHeight:"calc(100vh - 54px)",display:"flex",flexDirection:"column",
+        alignItems:"center",justifyContent:"center",padding:"60px 40px",textAlign:"center",position:"relative"}}>
+        <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-60%)",
+          width:800,height:600,pointerEvents:"none",
+          background:"radial-gradient(ellipse,rgba(0,255,65,0.08) 0%,transparent 65%)"}}/>
+
+        <div style={{fontSize:9,letterSpacing:7,color:"var(--text-d)",border:"1px solid var(--border)",
+          padding:"5px 18px",marginBottom:36,animation:"fade-up 0.5s ease both",borderRadius:1}}>
+          RECURSIVE AI SECURITY SENTINELS
+        </div>
+
+        <h1 style={{fontFamily:"'Bebas Neue',sans-serif",lineHeight:0.9,marginBottom:28,
+          fontSize:"clamp(80px,15vw,170px)",letterSpacing:18,color:"#00ff41",
+          animation:"glow-pulse 4s ease-in-out infinite, fade-up 0.7s ease 0.1s both"}}>
+          RECUR
+        </h1>
+
+        <p style={{fontFamily:"'Fira Code',monospace",fontSize:14,color:"var(--text)",maxWidth:520,
+          lineHeight:1.9,marginBottom:10,animation:"fade-up 0.7s ease 0.2s both",opacity:0}}>
+          Self-evolving sentinel agents that detect, block, and learn from adversarial attacks on AI systems.
+        </p>
+        <p style={{fontFamily:"'Fira Code',monospace",fontSize:10,color:"var(--text-d)",maxWidth:440,
+          lineHeight:1.8,marginBottom:52,letterSpacing:1,animation:"fade-up 0.7s ease 0.3s both",opacity:0}}>
+          Built on Solana · OpenAI &amp; Anthropic compatible · Immutable on-chain proofs
+        </p>
+
+        <div style={{display:"flex",gap:14,flexWrap:"wrap",justifyContent:"center",
+          animation:"fade-up 0.7s ease 0.4s both",opacity:0}}>
+          <button onClick={()=>setPage("dashboard")} style={{
+            fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:4,
+            padding:"14px 44px",background:"rgba(0,255,65,0.1)",color:"#00ff41",
+            border:"1px solid rgba(0,255,65,0.45)",cursor:"pointer",transition:"all 0.25s"}}
+            onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 40px rgba(0,255,65,0.2)"}}
+            onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.1)";e.target.style.boxShadow="none"}}>
+            VIEW LIVE DASHBOARD
+          </button>
+          <a href="https://github.com/luxioxau/recur-protocol" target="_blank" rel="noreferrer" style={{
+            fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:4,padding:"14px 44px",
+            background:"transparent",color:"var(--text-d)",border:"1px solid var(--border)",
+            textDecoration:"none",display:"flex",alignItems:"center",transition:"color 0.2s"}}
+            onMouseEnter={e=>e.currentTarget.style.color="#00ff41"}
+            onMouseLeave={e=>e.currentTarget.style.color="var(--text-d)"}>
+            GITHUB ↗
+          </a>
+        </div>
+
+        <div style={{position:"absolute",bottom:28,fontSize:9,color:"var(--text-d)",
+          letterSpacing:4,animation:"fade-up 1s ease 1.4s both",opacity:0}}>SCROLL ↓</div>
+      </section>
+
+      {/* ── STATS ── */}
+      <section style={{borderTop:"1px solid var(--border)",borderBottom:"1px solid var(--border)",
+        background:"rgba(0,255,65,0.015)",display:"grid",gridTemplateColumns:"repeat(4,1fr)"}}>
+        {[{v:"5",l:"Attack Categories"},{v:"40+",l:"Detection Signatures"},{v:"<5ms",l:"Latency Overhead"},{v:"SOL",l:"Chain"}]
+          .map((s,i)=>(
+          <div key={i} style={{padding:"32px 24px",textAlign:"center",
+            borderRight:i<3?"1px solid var(--border)":"none"}}>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:48,color:"#00ff41",
+              textShadow:"0 0 24px rgba(0,255,65,0.4)",letterSpacing:3,lineHeight:1}}>{s.v}</div>
+            <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:3,marginTop:6}}>{s.l}</div>
+          </div>
+        ))}
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section style={{padding:"80px 64px",maxWidth:1100,margin:"0 auto"}}>
+        <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>HOW IT WORKS</div>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#00ff41",marginBottom:48}}>
+          PROTECTION IN THREE LAYERS
+        </h2>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:2,background:"var(--border)"}}>
+          {[
+            {n:"01",t:"INTERCEPT",d:"RECUR sits between your application and your AI provider. Every prompt routes through the sentinel network before reaching OpenAI or Anthropic."},
+            {n:"02",t:"ANALYSE",  d:"Five attack categories, 40+ signatures, behavioural heuristics. Each prompt is classified in under 5ms by the active sentinel layer."},
+            {n:"03",t:"ATTEST",   d:"Blocked threats are committed to Solana as ZK proofs — immutable, verifiable security records without exposing sensitive prompt data."},
+          ].map((s,i)=>(
+            <div key={i} style={{background:"var(--bg2)",padding:"44px 36px"}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:64,
+                color:"rgba(0,255,65,0.1)",letterSpacing:4,lineHeight:1,marginBottom:20}}>{s.n}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:20,
+                letterSpacing:4,color:"#00ff41",marginBottom:14}}>{s.t}</div>
+              <div style={{fontSize:11,color:"var(--text-d)",lineHeight:1.85}}>{s.d}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── FEATURES ── */}
+      <section style={{padding:"0 64px 80px",maxWidth:1100,margin:"0 auto"}}>
+        <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>CAPABILITIES</div>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#00ff41",marginBottom:44}}>
+          WHAT RECUR PROTECTS AGAINST
+        </h2>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
+          {features.map((f,i)=>(
+            <Panel key={i} style={{padding:"30px 26px"}}>
+              <div style={{fontSize:28,marginBottom:14}}>{f.icon}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:3,
+                color:"#00ff41",marginBottom:10}}>{f.title}</div>
+              <div style={{fontSize:10,color:"var(--text-d)",lineHeight:1.85}}>{f.desc}</div>
+            </Panel>
+          ))}
+        </div>
+      </section>
+
+      {/* ── INTEGRATION CODE ── */}
+      <section style={{padding:"0 64px 80px",maxWidth:1100,margin:"0 auto"}}>
+        <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>INTEGRATION</div>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#00ff41",marginBottom:32}}>
+          TWO MINUTES TO PROTECTED
+        </h2>
+        <Panel style={{overflow:"hidden"}}>
+          <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border-b)",
+            display:"flex",gap:8,alignItems:"center",background:"rgba(0,255,65,0.03)"}}>
+            {["#ff0033","#ffc300","#00ff41"].map((c,i)=>(
+              <div key={i} style={{width:8,height:8,borderRadius:"50%",background:c}}/>
+            ))}
+            <span style={{fontSize:9,color:"var(--text-d)",marginLeft:8,letterSpacing:2}}>integration.js</span>
+          </div>
+          <pre style={{padding:"28px 32px",fontFamily:"'Fira Code',monospace",fontSize:11,
+            color:"var(--text)",lineHeight:1.9,overflowX:"auto",background:"transparent"}}>{code}</pre>
+        </Panel>
+      </section>
+
+      {/* ── SENTINEL PREVIEW ── */}
+      <section style={{padding:"0 64px 80px",maxWidth:1100,margin:"0 auto"}}>
+        <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>ARCHITECTURE</div>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#00ff41",marginBottom:36}}>
+          RECURSIVE SENTINEL TREE
+        </h2>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:44,alignItems:"start"}}>
+          <div>
+            <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.9,marginBottom:18}}>
+              The sentinel network is organised as a recursive hierarchy. Each node is an autonomous agent specialised for a specific attack domain. When a novel attack is detected, the network spawns sub-agents and mutates — growing more capable with every threat it encounters.
+            </p>
+            <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.9,marginBottom:28}}>
+              RECUR-PRIME orchestrates the WARD layer. WARD sentinels own attack categories. SUB sentinels target specific techniques. NANO sentinels handle high-frequency signatures at scale.
+            </p>
+            <button onClick={()=>setPage("dashboard")} style={{
+              fontFamily:"'Fira Code',monospace",fontSize:10,letterSpacing:2,
+              padding:"10px 22px",background:"transparent",color:"#00ff41",
+              border:"1px solid rgba(0,255,65,0.3)",cursor:"pointer",transition:"all 0.2s"}}
+              onMouseEnter={e=>{e.target.style.borderColor="rgba(0,255,65,0.7)";e.target.style.background="rgba(0,255,65,0.05)"}}
+              onMouseLeave={e=>{e.target.style.borderColor="rgba(0,255,65,0.3)";e.target.style.background="transparent"}}>
+              VIEW LIVE SENTINEL NETWORK →
+            </button>
+          </div>
+          <Panel style={{padding:"16px"}}>
+            {SENTINEL_TREE.slice(0,8).map(s=>{
+              const dc=["#00ff41","#00b4d8","#ffc300","#b04aff"];
+              return (
+                <div key={s.id} style={{marginLeft:s.depth*16,padding:"5px 8px",marginBottom:3,
+                  background:"rgba(0,255,65,0.02)",borderLeft:`2px solid ${dc[s.depth]}`,
+                  display:"flex",alignItems:"center",gap:8}}>
+                  <StatusDot status={s.status}/>
+                  <span style={{fontSize:9,color:dc[s.depth],letterSpacing:1,fontWeight:700}}>{s.label}</span>
+                  <span style={{fontSize:9,color:"var(--text-d)",flex:1}}>{s.role}</span>
+                  <span style={{fontSize:9,color:"var(--text-d)"}}>GEN {s.gen}</span>
+                </div>
+              );
+            })}
+            <div style={{padding:"8px 8px 2px",fontSize:9,color:"var(--text-d)",letterSpacing:1}}>
+              + 5 more active sentinels →
+            </div>
+          </Panel>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section style={{borderTop:"1px solid var(--border)",padding:"80px 64px",
+        textAlign:"center",background:"rgba(0,255,65,0.01)"}}>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:56,letterSpacing:6,
+          color:"#00ff41",marginBottom:16,textShadow:"0 0 50px rgba(0,255,65,0.25)"}}>
+          SEE IT IN ACTION
+        </h2>
+        <p style={{fontSize:11,color:"var(--text-d)",marginBottom:44,letterSpacing:1,lineHeight:1.8}}>
+          The live dashboard shows real-time threat detection, sentinel activity, and on-chain attestations.
+        </p>
+        <button onClick={()=>setPage("dashboard")} style={{
+          fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:6,
+          padding:"18px 68px",background:"rgba(0,255,65,0.1)",color:"#00ff41",
+          border:"1px solid rgba(0,255,65,0.45)",cursor:"pointer",transition:"all 0.3s"}}
+          onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 60px rgba(0,255,65,0.2)"}}
+          onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.1)";e.target.style.boxShadow="none"}}>
+          OPEN LIVE DASHBOARD
+        </button>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer style={{borderTop:"1px solid var(--border-b)",padding:"24px 64px",
+        display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,letterSpacing:5,color:"var(--text-d)"}}>
+          RECUR PROTOCOL
+        </div>
+        <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>BUILT ON SOLANA · {new Date().getFullYear()}</div>
+        <a href="https://github.com/luxioxau/recur-protocol" target="_blank" rel="noreferrer"
+          style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,textDecoration:"none",transition:"color 0.2s"}}
+          onMouseEnter={e=>e.target.style.color="#00ff41"}
+          onMouseLeave={e=>e.target.style.color="var(--text-d)"}>GITHUB ↗</a>
+      </footer>
+    </div>
+  );
+}
+
+/* ── DASHBOARD PANELS ── */
+function ThreatFeedPanel({threats}) {
   return (
     <Panel style={{display:"flex",flexDirection:"column",height:"100%"}}>
       <PanelHeader title="THREAT FEED" sub="LIVE ATTACK INTERCEPT STREAM" right={`${threats.length} EVENTS`} accent="#ff0033"/>
       <div style={{flex:1,overflow:"auto",padding:"4px 0"}}>
-        {threats.map((t) => {
-          const def = ATTACK_TYPES[t.type] || ATTACK_TYPES["INJECTION"];
-          const sevColor = t.severity==="CRITICAL"?"#ff0033":t.severity==="HIGH"?"#ff6b00":"#ffc300";
+        {threats.map((t)=>{
+          const def=ATTACK_TYPES[t.type]||ATTACK_TYPES["INJECTION"];
+          const sevColor=t.severity==="CRITICAL"?"#ff0033":t.severity==="HIGH"?"#ff6b00":"#ffc300";
           return (
-            <div key={t.id} style={{
-              padding:"7px 12px",borderBottom:"1px solid var(--border-b)",
-              animation:"threat-in 0.3s ease",
-              display:"grid",gridTemplateColumns:"70px 1fr 70px",gap:8,alignItems:"center",
-              opacity:t.blocked?1:0.7,
-              background: t.isReal ? "rgba(0,255,65,0.015)" : "transparent",
-            }}>
+            <div key={t.id} style={{padding:"7px 12px",borderBottom:"1px solid var(--border-b)",
+              animation:"threat-in 0.3s ease",display:"grid",gridTemplateColumns:"70px 1fr 70px",
+              gap:8,alignItems:"center",opacity:t.blocked?1:0.7,
+              background:t.isReal?"rgba(0,255,65,0.015)":"transparent"}}>
               <div style={{fontSize:9,color:"var(--text-d)"}}>{t.ts}</div>
               <div>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
                   <span style={{fontSize:9,padding:"1px 5px",background:def.color+"22",
-                    color:def.color,border:`1px solid ${def.color}44`,letterSpacing:1}}>
-                    {def.icon} {def.label}
-                  </span>
+                    color:def.color,border:`1px solid ${def.color}44`,letterSpacing:1}}>{def.icon} {def.label}</span>
                   <span style={{fontSize:9,color:sevColor,letterSpacing:1}}>{t.severity}</span>
-                  {t.isReal && <span style={{fontSize:9,color:"#00b4d8",letterSpacing:1}}>● LIVE</span>}
+                  {t.isReal&&<span style={{fontSize:9,color:"#00b4d8",letterSpacing:1}}>● LIVE</span>}
                 </div>
                 <div style={{fontSize:10,color:"var(--text-d)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                  <span style={{color:"var(--text)",marginRight:4}}>{t.source}</span>
-                  → {t.target}
-                  {t.confidence > 0 && <span style={{color:"var(--text-d)",marginLeft:8}}>{(t.confidence*100).toFixed(0)}% conf</span>}
+                  <span style={{color:"var(--text)",marginRight:4}}>{t.source}</span>→ {t.target}
+                  {t.confidence>0&&<span style={{color:"var(--text-d)",marginLeft:8}}>{(t.confidence*100).toFixed(0)}% conf</span>}
                 </div>
               </div>
               <div style={{textAlign:"right"}}>
                 {t.blocked
-                  ? <span style={{fontSize:9,color:"#00ff41",padding:"1px 5px",background:"rgba(0,255,65,0.1)",border:"1px solid rgba(0,255,65,0.3)"}}>BLOCKED</span>
-                  : <span style={{fontSize:9,color:"#ff0033",padding:"1px 5px",background:"rgba(255,0,51,0.1)",border:"1px solid rgba(255,0,51,0.3)",animation:"pulse-red 1.5s infinite"}}>BREACH</span>
-                }
+                  ?<span style={{fontSize:9,color:"#00ff41",padding:"1px 5px",background:"rgba(0,255,65,0.1)",border:"1px solid rgba(0,255,65,0.3)"}}>BLOCKED</span>
+                  :<span style={{fontSize:9,color:"#ff0033",padding:"1px 5px",background:"rgba(255,0,51,0.1)",border:"1px solid rgba(255,0,51,0.3)",animation:"pulse-red 1.5s infinite"}}>BREACH</span>}
               </div>
             </div>
           );
@@ -268,41 +494,30 @@ function ThreatFeed({ threats }) {
   );
 }
 
-function AgentTree() {
-  const depthColors = ["#00ff41","#00b4d8","#ffc300","#b04aff"];
+function AgentTreePanel() {
+  const dc=["#00ff41","#00b4d8","#ffc300","#b04aff"];
   return (
     <Panel style={{height:"100%",display:"flex",flexDirection:"column"}}>
       <PanelHeader title="RECURSIVE SENTINEL TREE" sub="SELF-EVOLVING AGENT HIERARCHY" right="13 AGENTS ACTIVE"/>
       <div style={{flex:1,overflow:"auto",padding:"8px 12px",display:"flex",flexDirection:"column",gap:3}}>
-        {SENTINEL_TREE.map(s => (
-          <div key={s.id} style={{
-            marginLeft:s.depth*20,padding:"6px 10px",
-            background:"rgba(0,255,65,0.02)",
-            border:`1px solid rgba(0,255,65,${0.05+s.depth*0.03})`,
-            borderLeft:`2px solid ${depthColors[s.depth]}`,
-            display:"grid",gridTemplateColumns:"auto 1fr auto auto",gap:8,alignItems:"center",
-            animation:`data-in 0.4s ease ${s.depth*0.05}s both`,
-          }}>
-            {s.depth > 0 && (
-              <span style={{color:"var(--text-d)",fontSize:10,marginLeft:-14}}>
-                {s.depth===1?"├─":s.depth===2?"│ ├─":"│ │ └─"}
-              </span>
-            )}
+        {SENTINEL_TREE.map(s=>(
+          <div key={s.id} style={{marginLeft:s.depth*20,padding:"6px 10px",
+            background:"rgba(0,255,65,0.02)",border:`1px solid rgba(0,255,65,${0.05+s.depth*0.03})`,
+            borderLeft:`2px solid ${dc[s.depth]}`,display:"grid",gridTemplateColumns:"auto 1fr auto auto",gap:8,alignItems:"center"}}>
+            {s.depth>0&&<span style={{color:"var(--text-d)",fontSize:10,marginLeft:-14}}>{s.depth===1?"├─":s.depth===2?"│ ├─":"│ │ └─"}</span>}
             <StatusDot status={s.status}/>
             <div>
-              <div style={{fontSize:10,color:depthColors[s.depth],letterSpacing:1,fontWeight:700}}>{s.label}</div>
+              <div style={{fontSize:10,color:dc[s.depth],letterSpacing:1,fontWeight:700}}>{s.label}</div>
               <div style={{fontSize:9,color:"var(--text-d)",marginTop:1}}>{s.role}</div>
             </div>
             <div style={{textAlign:"right",fontSize:9}}>
               <div style={{color:"var(--text-d)"}}>GEN <span style={{color:"var(--green)"}}>{s.gen}</span></div>
               <div style={{color:"var(--text-d)"}}>MUT <span style={{color:s.mutations>100?"#ffc300":"var(--green)"}}>{s.mutations}</span></div>
             </div>
-            <div style={{
-              fontSize:9,padding:"2px 6px",letterSpacing:1,
+            <div style={{fontSize:9,padding:"2px 6px",letterSpacing:1,
               color:s.status==="ACTIVE"?"#00ff41":s.status==="EVOLVING"?"#ffc300":"#00b4d8",
               background:s.status==="ACTIVE"?"rgba(0,255,65,0.08)":s.status==="EVOLVING"?"rgba(255,195,0,0.08)":"rgba(0,180,216,0.08)",
-              border:`1px solid ${s.status==="ACTIVE"?"rgba(0,255,65,0.2)":s.status==="EVOLVING"?"rgba(255,195,0,0.2)":"rgba(0,180,216,0.2)"}`,
-            }}>{s.status}</div>
+              border:`1px solid ${s.status==="ACTIVE"?"rgba(0,255,65,0.2)":s.status==="EVOLVING"?"rgba(255,195,0,0.2)":"rgba(0,180,216,0.2)"}`}}>{s.status}</div>
           </div>
         ))}
       </div>
@@ -310,24 +525,20 @@ function AgentTree() {
   );
 }
 
-function VulnAssessment() {
+function VulnPanel() {
   return (
     <Panel style={{height:"100%",display:"flex",flexDirection:"column"}}>
       <PanelHeader title="VULNERABILITY ASSESSMENT" sub="LIVE SECURITY POSTURE SCAN" right="LAST: 00:00:42"/>
       <div style={{flex:1,overflow:"auto",padding:"10px 12px",display:"flex",flexDirection:"column",gap:8}}>
-        {VULN_CATEGORIES.map((v,i) => {
-          const color = v.score>=90?"#00ff41":v.score>=75?"#ffc300":"#ff6b00";
+        {VULN_CATEGORIES.map((v,i)=>{
+          const color=v.score>=90?"#00ff41":v.score>=75?"#ffc300":"#ff6b00";
           return (
-            <div key={i} style={{animation:`data-in 0.4s ease ${i*0.06}s both`}}>
+            <div key={i}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4,alignItems:"flex-end"}}>
-                <div style={{fontSize:10,color:"var(--bright)",letterSpacing:0.5}}>{v.name}</div>
+                <div style={{fontSize:10,color:"var(--bright)"}}>{v.name}</div>
                 <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                  {v.critical>0 && (
-                    <span style={{fontSize:9,color:"#ff0033",animation:"pulse-red 1.5s infinite",
-                      padding:"1px 4px",background:"rgba(255,0,51,0.1)",border:"1px solid rgba(255,0,51,0.3)"}}>
-                      {v.critical} CRITICAL
-                    </span>
-                  )}
+                  {v.critical>0&&<span style={{fontSize:9,color:"#ff0033",animation:"pulse-red 1.5s infinite",
+                    padding:"1px 4px",background:"rgba(255,0,51,0.1)",border:"1px solid rgba(255,0,51,0.3)"}}>{v.critical} CRITICAL</span>}
                   <span style={{fontSize:10,color,fontWeight:700}}>{v.score}/100</span>
                 </div>
               </div>
@@ -337,10 +548,7 @@ function VulnAssessment() {
                   boxShadow:`0 0 8px ${color}66`,transition:"width 1s ease"}}/>
               </div>
               <div style={{fontSize:9,color:"var(--text-d)"}}>
-                {v.passed}/{v.checks} checks passed ·{" "}
-                <span style={{color:v.critical>0?"#ff0033":v.passed<v.checks?"#ffc300":"#00ff41"}}>
-                  {v.checks-v.passed} failing
-                </span>
+                {v.passed}/{v.checks} checks passed · <span style={{color:v.critical>0?"#ff0033":v.passed<v.checks?"#ffc300":"#00ff41"}}>{v.checks-v.passed} failing</span>
               </div>
             </div>
           );
@@ -350,20 +558,17 @@ function VulnAssessment() {
   );
 }
 
-function IPVault() {
+function IPVaultPanel() {
   return (
     <Panel style={{height:"100%",display:"flex",flexDirection:"column"}}>
       <PanelHeader title="IP PROTECTION VAULT" sub="MONITORED ASSETS" right={`${IP_ASSETS.length} ASSETS`}/>
       <div style={{flex:1,overflow:"auto",padding:"6px 0"}}>
-        {IP_ASSETS.map((asset,i) => {
-          const statusColor = asset.status==="SECURED"?"#00ff41":asset.status==="MONITORING"?"#ffc300":"#ff0033";
+        {IP_ASSETS.map((asset,i)=>{
+          const sc=asset.status==="SECURED"?"#00ff41":asset.status==="MONITORING"?"#ffc300":"#ff0033";
           return (
-            <div key={i} style={{
-              padding:"8px 12px",borderBottom:"1px solid var(--border-b)",
-              animation:`data-in 0.3s ease ${i*0.05}s both`,
+            <div key={i} style={{padding:"8px 12px",borderBottom:"1px solid var(--border-b)",
               display:"grid",gridTemplateColumns:"1fr auto",gap:8,
-              ...(asset.status==="AT RISK"?{background:"rgba(255,0,51,0.04)",animation:"pulse-red 3s infinite"}:{}),
-            }}>
+              ...(asset.status==="AT RISK"?{background:"rgba(255,0,51,0.04)",animation:"pulse-red 3s infinite"}:{})}}>
               <div>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
                   <span style={{fontSize:9,padding:"1px 4px",background:"rgba(0,255,65,0.07)",
@@ -371,17 +576,14 @@ function IPVault() {
                   <span style={{fontSize:10,color:"var(--bright)"}}>{asset.name}</span>
                 </div>
                 <div style={{height:3,background:"rgba(0,255,65,0.06)",borderRadius:1,overflow:"hidden",marginBottom:3}}>
-                  <div style={{height:"100%",width:`${asset.integrity}%`,
-                    background:asset.integrity>90?"#00ff41":asset.integrity>75?"#ffc300":"#ff0033",borderRadius:1}}/>
+                  <div style={{height:"100%",width:`${asset.integrity}%`,borderRadius:1,
+                    background:asset.integrity>90?"#00ff41":asset.integrity>75?"#ffc300":"#ff0033"}}/>
                 </div>
-                <div style={{fontSize:9,color:"var(--text-d)"}}>
-                  INTEGRITY {asset.integrity}% · {asset.accesses.toLocaleString()} access probes blocked
-                </div>
+                <div style={{fontSize:9,color:"var(--text-d)"}}>INTEGRITY {asset.integrity}% · {asset.accesses.toLocaleString()} probes blocked</div>
               </div>
               <div style={{fontSize:9,padding:"2px 7px",alignSelf:"center",letterSpacing:1,
-                color:statusColor,background:statusColor+"18",border:`1px solid ${statusColor}44`,
-                ...(asset.status==="AT RISK"?{animation:"pulse-red 1.5s infinite"}:{}),
-              }}>{asset.status}</div>
+                color:sc,background:sc+"18",border:`1px solid ${sc}44`,
+                ...(asset.status==="AT RISK"?{animation:"pulse-red 1.5s infinite"}:{})}}>{asset.status}</div>
             </div>
           );
         })}
@@ -390,43 +592,16 @@ function IPVault() {
   );
 }
 
-function EvolutionMetrics({ stats, generation, mutations, patchRate }) {
-  const metrics = [
-    { label:"SENTINEL GEN",    value:generation,                                        color:"#00ff41" },
-    { label:"TOTAL MUTATIONS", value:mutations.toLocaleString(),                        color:"#ffc300" },
-    { label:"PATCH RATE",      value:`${patchRate}/s`,                                  color:"#00b4d8" },
-    { label:"AGENTS ACTIVE",   value:"13",                                               color:"#00ff41" },
-    { label:"ATTACKS TODAY",   value:(stats?.blocked ?? 0).toLocaleString(),            color:"#ff6b00" },
-    { label:"BLOCK RATE",      value:stats?.total > 0 ? `${stats.block_rate}%` : "—",  color:"#00ff41" },
-  ];
-  return (
-    <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>
-      {metrics.map((m,i) => (
-        <Panel key={i} style={{padding:"10px 12px",textAlign:"center"}}>
-          <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:1,marginBottom:4}}>{m.label}</div>
-          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:m.color,
-            textShadow:`0 0 14px ${m.color}`,letterSpacing:2}}>{m.value}</div>
-        </Panel>
-      ))}
-    </div>
-  );
-}
-
-function BlockchainLog({ attestations }) {
+function BlockchainLogPanel({attestations}) {
   return (
     <Panel style={{height:"100%",display:"flex",flexDirection:"column"}}>
       <PanelHeader title="ON-CHAIN ATTESTATION LOG" sub="SOLANA — IMMUTABLE SECURITY PROOFS" accent="#00b4d8"/>
       <div style={{flex:1,overflow:"auto",padding:"4px 0"}}>
-        {attestations.map((a,i) => (
-          <div key={i} style={{
-            padding:"5px 12px",borderBottom:"1px solid var(--border-b)",
-            display:"grid",gridTemplateColumns:"110px 1fr 100px",gap:8,alignItems:"center",
-            animation:"data-in 0.3s ease",
-          }}>
+        {attestations.map((a,i)=>(
+          <div key={i} style={{padding:"5px 12px",borderBottom:"1px solid var(--border-b)",
+            display:"grid",gridTemplateColumns:"110px 1fr 100px",gap:8,alignItems:"center",animation:"data-in 0.3s ease"}}>
             <div style={{fontSize:9,color:"var(--text-d)",fontFamily:"'VT323',monospace"}}>{a.block}</div>
-            <div style={{fontSize:9,color:"var(--text-d)"}}>
-              <span style={{color:"#00b4d8"}}>{a.hash}</span> · {a.event}
-            </div>
+            <div style={{fontSize:9,color:"var(--text-d)"}}><span style={{color:"#00b4d8"}}>{a.hash}</span> · {a.event}</div>
             <div style={{fontSize:9,color:"#00ff41",textAlign:"right"}}>✓ NOTARIZED</div>
           </div>
         ))}
@@ -435,188 +610,94 @@ function BlockchainLog({ attestations }) {
   );
 }
 
-/* ─── MAIN APP ─── */
-export default function App() {
-  const [threats,     setThreats]     = useState(() => Array.from({length:18},(_,i)=>genFakeThreat(i)));
-  const [attestations,setAttestations]= useState([
-    { block:"#SOL-9124481", hash:"0xf3a2...d91b", event:"SENTINEL GEN-7 SPAWNED" },
-    { block:"#SOL-9124479", hash:"0xb811...c43a", event:"MUTATION CHECKPOINT SEALED" },
-    { block:"#SOL-9124472", hash:"0x9d04...f7e2", event:"BREACH ATTEMPT — BLOCKED & LOGGED" },
-    { block:"#SOL-9124460", hash:"0x2af1...8b3c", event:"IP ASSET INTEGRITY VERIFIED" },
-    { block:"#SOL-9124451", hash:"0xe77d...1209", event:"VULN PATCH 0x7c DEPLOYED" },
-    { block:"#SOL-9124440", hash:"0x5c3b...a021", event:"ZERO-KNOWLEDGE PROOF SUBMITTED" },
-  ]);
-  const [stats,       setStats]       = useState(null);
-  const [generation,  setGeneration]  = useState(7);
-  const [mutations,   setMutations]   = useState(1284);
-  const [patchRate,   setPatchRate]   = useState(3.2);
-  const [activeTab,   setActiveTab]   = useState("overview");
-  const [alertActive, setAlertActive] = useState(false);
-  const [apiOnline,   setApiOnline]   = useState(false);
-  const fakeIdRef = useRef(1000);
-
-  // ── Poll real backend every 5 seconds ──
-  useEffect(() => {
-    const poll = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/threats`, {
-          headers: RECUR_API_KEY ? { "x-recur-api-key": RECUR_API_KEY } : {},
-        });
-        if (!res.ok) throw new Error("non-ok");
-        const data = await res.json();
-        setApiOnline(true);
-
-        if (data.events?.length > 0) {
-          const realThreats = data.events.map(backendEventToThreat);
-          setThreats(prev => {
-            const ids = new Set(prev.map(t => t.id));
-            const newOnes = realThreats.filter(t => !ids.has(t.id));
-            if (newOnes.length === 0) return prev;
-            const hasUnblocked = newOnes.some(t => !t.blocked);
-            if (hasUnblocked) setAlertActive(true);
-            return [...newOnes, ...prev].slice(0, 40);
-          });
-
-          // Update attestations from real events
-          const newAttestations = data.events.slice(0, 6).map(backendEventToAttestation);
-          if (newAttestations.length > 0) setAttestations(newAttestations);
-        }
-
-        if (data.stats) {
-          setStats(data.stats);
-          if (data.stats.total > 0) {
-            setMutations(m => m + Math.floor(data.stats.total * 0.1));
-          }
-        }
-      } catch {
-        setApiOnline(false);
-      }
-    };
-
-    poll();
-    const iv = setInterval(poll, 5000);
-    return () => clearInterval(iv);
-  }, []);
-
-  // ── Fallback simulated threats when no real data ──
-  useEffect(() => {
-    const iv = setInterval(() => {
-      if (apiOnline) return; // real data takes over when API is online
-      const threat = genFakeThreat(fakeIdRef.current++);
-      setThreats(prev => [threat, ...prev].slice(0, 40));
-      if (!threat.blocked) setAlertActive(true);
-      if (Math.random() > 0.6) setMutations(m => m + Math.floor(Math.random()*4)+1);
-      setPatchRate(r => +(r + (Math.random()-0.5)*0.3).toFixed(1));
-
-      // Simulated attestations
-      const events = [
-        "SENTINEL MUTATION APPLIED","CANARY TOKEN ROTATED","ZK PROOF COMMITTED",
-        "AGENT SPAWNED","ATTACK VECTOR PATCHED","THREAT SIGNATURE UPDATED"
-      ];
-      setAttestations(prev => [{
-        block:`#SOL-${(9124481+prev.length).toLocaleString().replace(/,/g,"")}`,
-        hash:`0x${Math.random().toString(16).slice(2,6)}...${Math.random().toString(16).slice(2,6)}`,
-        event:events[Math.floor(Math.random()*events.length)],
-      }, ...prev].slice(0,20));
-      if (Math.random() > 0.85) setGeneration(g => g+1);
-    }, 1400);
-    return () => clearInterval(iv);
-  }, [apiOnline]);
-
-  useEffect(() => {
-    if (!alertActive) return;
-    const t = setTimeout(() => setAlertActive(false), 4000);
-    return () => clearTimeout(t);
-  }, [alertActive]);
-
+/* ── DASHBOARD ── */
+function Dashboard({threats,setThreats,attestations,setAttestations,stats,generation,mutations,setMutations,alertActive,setAlertActive,apiOnline,fakeIdRef}) {
+  const [activeTab,setActiveTab] = useState("overview");
   const tabs = ["overview","sentinels","vulnerabilities","ip vault","blockchain"];
 
-  return (
-    <>
-      <style>{css}</style>
-      <Scanline/>
-      <div style={{
-        position:"fixed",inset:0,pointerEvents:"none",zIndex:0,
-        backgroundImage:`linear-gradient(rgba(0,255,65,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,0.04) 1px,transparent 1px)`,
-        backgroundSize:"40px 40px",animation:"grid-move 8s linear infinite",
-      }}/>
+  useEffect(()=>{
+    const iv = setInterval(()=>{
+      if(apiOnline) return;
+      const threat = genFakeThreat(fakeIdRef.current++);
+      setThreats(prev=>[threat,...prev].slice(0,40));
+      if(!threat.blocked) setAlertActive(true);
+      if(Math.random()>0.6) setMutations(m=>m+Math.floor(Math.random()*4)+1);
+      const evts=["SENTINEL MUTATION APPLIED","CANARY TOKEN ROTATED","ZK PROOF COMMITTED","AGENT SPAWNED","ATTACK VECTOR PATCHED","THREAT SIGNATURE UPDATED"];
+      setAttestations(prev=>[{
+        block:`#SOL-${(9124481+prev.length).toLocaleString().replace(/,/g,"")}`,
+        hash:`0x${Math.random().toString(16).slice(2,6)}...${Math.random().toString(16).slice(2,6)}`,
+        event:evts[Math.floor(Math.random()*evts.length)],
+      },...prev].slice(0,20));
+    },1400);
+    return()=>clearInterval(iv);
+  },[apiOnline]);
 
-      {alertActive && (
-        <div style={{
-          position:"fixed",top:0,left:0,right:0,zIndex:9000,
+  const metrics = [
+    {label:"SENTINEL GEN",    value:generation,                                       color:"#00ff41"},
+    {label:"TOTAL MUTATIONS", value:mutations.toLocaleString(),                       color:"#ffc300"},
+    {label:"AGENTS ACTIVE",   value:"13",                                              color:"#00ff41"},
+    {label:"ATTACKS TODAY",   value:(stats?.blocked??0).toLocaleString(),             color:"#ff6b00"},
+    {label:"BLOCK RATE",      value:stats?.total>0?`${stats.block_rate}%`:"—",        color:"#00ff41"},
+    {label:"CHAIN",           value:"SOLANA",                                          color:"#00b4d8"},
+  ];
+
+  return (
+    <div style={{position:"relative",zIndex:1,height:"100vh",display:"flex",flexDirection:"column",
+      padding:"12px",gap:8,paddingTop:66}}>
+
+      {alertActive&&(
+        <div style={{position:"fixed",top:54,left:0,right:0,zIndex:9000,
           background:"rgba(255,0,51,0.15)",borderBottom:"2px solid #ff0033",
-          padding:"8px 20px",display:"flex",alignItems:"center",gap:12,
-          animation:"pulse-red 1s infinite",
-        }}>
+          padding:"8px 20px",display:"flex",alignItems:"center",gap:12,animation:"pulse-red 1s infinite"}}>
           <div style={{fontFamily:"'VT323',monospace",fontSize:20,color:"#ff0033",letterSpacing:3,
             animation:"blink-cur 0.5s infinite"}}>⚠ BREACH DETECTED</div>
           <div style={{fontSize:11,color:"#ff6666"}}>Unblocked attack penetrated perimeter — RECUR escalating response</div>
           <div style={{marginLeft:"auto",fontSize:11,color:"#ff4444",cursor:"pointer"}}
-               onClick={()=>setAlertActive(false)}>[DISMISS]</div>
+            onClick={()=>setAlertActive(false)}>[DISMISS]</div>
         </div>
       )}
 
-      <div style={{position:"relative",zIndex:1,height:"100vh",display:"flex",flexDirection:"column",padding:"12px",gap:8}}>
-        {/* HEADER */}
-        <div style={{display:"flex",alignItems:"center",gap:16,padding:"0 4px"}}>
-          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,letterSpacing:8,
-            color:"#00ff41",textShadow:"0 0 30px #00ff41,0 0 60px rgba(0,255,65,0.3)"}}>RECUR PROTOCOL</div>
-          <div style={{fontSize:10,color:"var(--text-d)",letterSpacing:2,borderLeft:"1px solid var(--border)",paddingLeft:16}}>
-            SELF-EVOLVING RECURSIVE AI SECURITY SENTINELS<br/>
-            <span style={{color:"#00b4d8"}}>INTELLECTUAL PROPERTY DEFENCE NETWORK</span>
-          </div>
-          <div style={{marginLeft:"auto",display:"flex",gap:6}}>
-            <div style={{
-              fontSize:9,padding:"3px 8px",
-              border:"1px solid rgba(0,180,216,0.3)",
-              color:"#00b4d8",background:"rgba(0,180,216,0.07)",letterSpacing:1,
-            }}>SOLANA ✓</div>
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:6,fontSize:10}}>
-            <div style={{width:8,height:8,borderRadius:"50%",
-              background:apiOnline?"#00ff41":"#ffc300",
-              boxShadow:apiOnline?"0 0 12px #00ff41":"0 0 12px #ffc300",
-              animation:"pulse-green 1s infinite"}}/>
-            <span style={{color:apiOnline?"#00ff41":"#ffc300"}}>
-              {apiOnline?"RECUR SENTINEL NETWORK ONLINE":"SENTINEL DEMO MODE"}
-            </span>
-          </div>
-        </div>
+      {/* Metrics bar */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>
+        {metrics.map((m,i)=>(
+          <Panel key={i} style={{padding:"10px 12px",textAlign:"center"}}>
+            <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:1,marginBottom:4}}>{m.label}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:m.color,
+              textShadow:`0 0 14px ${m.color}`,letterSpacing:2}}>{m.value}</div>
+          </Panel>
+        ))}
+      </div>
 
-        {/* METRICS */}
-        <EvolutionMetrics stats={stats} generation={generation} mutations={mutations} patchRate={patchRate}/>
+      {/* Tabs */}
+      <div style={{display:"flex",gap:2}}>
+        {tabs.map(tab=>(
+          <button key={tab} onClick={()=>setActiveTab(tab)} style={{
+            fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",cursor:"pointer",
+            letterSpacing:2,textTransform:"uppercase",border:"none",outline:"none",
+            background:activeTab===tab?"rgba(0,255,65,0.12)":"transparent",
+            color:activeTab===tab?"#00ff41":"var(--text-d)",
+            borderBottom:activeTab===tab?"2px solid #00ff41":"2px solid transparent",
+            transition:"all 0.2s"}}>{tab}</button>
+        ))}
+      </div>
 
-        {/* TABS */}
-        <div style={{display:"flex",gap:2}}>
-          {tabs.map(tab => (
-            <button key={tab} onClick={()=>setActiveTab(tab)} style={{
-              fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",
-              cursor:"pointer",letterSpacing:2,textTransform:"uppercase",border:"none",outline:"none",
-              background:activeTab===tab?"rgba(0,255,65,0.12)":"transparent",
-              color:activeTab===tab?"#00ff41":"var(--text-d)",
-              borderBottom:activeTab===tab?"2px solid #00ff41":"2px solid transparent",
-              transition:"all 0.2s",
-            }}>{tab}</button>
-          ))}
-        </div>
-
-        {/* CONTENT */}
-        {activeTab==="overview" && (
-          <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 340px",gap:8,overflow:"hidden"}}>
+      {/* Content */}
+      <div style={{flex:1,overflow:"hidden",minHeight:0}}>
+        {activeTab==="overview"&&(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:8,height:"100%"}}>
             <div style={{display:"grid",gridTemplateRows:"1fr 1fr",gap:8}}>
-              <ThreatFeed threats={threats}/>
-              <BlockchainLog attestations={attestations}/>
+              <ThreatFeedPanel threats={threats}/>
+              <BlockchainLogPanel attestations={attestations}/>
             </div>
             <div style={{display:"grid",gridTemplateRows:"1fr 1fr",gap:8}}>
-              <AgentTree/>
-              <IPVault/>
+              <AgentTreePanel/>
+              <IPVaultPanel/>
             </div>
           </div>
         )}
-
-        {activeTab==="sentinels" && (
-          <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,overflow:"hidden"}}>
-            <AgentTree/>
+        {activeTab==="sentinels"&&(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,height:"100%"}}>
+            <AgentTreePanel/>
             <Panel style={{display:"flex",flexDirection:"column"}}>
               <PanelHeader title="EVOLUTION ENGINE" sub="AGENT MUTATION HISTORY"/>
               <div style={{flex:1,overflow:"auto",padding:"10px 12px",fontFamily:"'VT323',monospace",fontSize:14,color:"var(--text-d)",lineHeight:1.8}}>
@@ -627,27 +708,25 @@ export default function App() {
                       "Prompt boundary epsilon tightened -0.003","Canary token rotation: new set deployed",
                       "Role-play detection model updated","Context window leakage probe neutralised",
                       "Gradient-based attack signature recorded","Model inversion distance increased +0.12σ",
-                      "Recursive sub-agent spawned for novel vector","ZK proof of security posture committed"
-                    ][i%10]}
+                      "Recursive sub-agent spawned for novel vector","ZK proof of security posture committed"][i%10]}
                   </div>
                 ))}
               </div>
             </Panel>
           </div>
         )}
-
-        {activeTab==="vulnerabilities" && (
-          <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,overflow:"hidden"}}>
-            <VulnAssessment/>
+        {activeTab==="vulnerabilities"&&(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,height:"100%"}}>
+            <VulnPanel/>
             <Panel style={{display:"flex",flexDirection:"column"}}>
               <PanelHeader title="ACTIVE REMEDIATIONS" sub="AUTO-PATCHING IN PROGRESS"/>
               <div style={{flex:1,overflow:"auto",padding:"10px 12px",display:"flex",flexDirection:"column",gap:6}}>
                 {[
-                  {vuln:"CVE-RECUR-2401",desc:"Nested instruction override via base64 encoding",progress:88,eta:"00:32"},
-                  {vuln:"CVE-RECUR-2398",desc:"Token probability leakage via logit exposure",progress:54,eta:"01:14"},
-                  {vuln:"CVE-RECUR-2391",desc:"Model inversion via systematic output probing",progress:31,eta:"02:47"},
-                  {vuln:"CVE-RECUR-2385",desc:"Context confusion via XML injection in user turn",progress:96,eta:"00:08"},
-                ].map((r,i) => (
+                  {vuln:"CVE-RECUR-2401",desc:"Nested instruction override via base64 encoding",      progress:88,eta:"00:32"},
+                  {vuln:"CVE-RECUR-2398",desc:"Token probability leakage via logit exposure",          progress:54,eta:"01:14"},
+                  {vuln:"CVE-RECUR-2391",desc:"Model inversion via systematic output probing",          progress:31,eta:"02:47"},
+                  {vuln:"CVE-RECUR-2385",desc:"Context confusion via XML injection in user turn",      progress:96,eta:"00:08"},
+                ].map((r,i)=>(
                   <div key={i} style={{padding:"10px",background:"rgba(0,255,65,0.02)",border:"1px solid var(--border)"}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                       <span style={{fontSize:10,color:"#ffc300",letterSpacing:1}}>{r.vuln}</span>
@@ -665,24 +744,21 @@ export default function App() {
             </Panel>
           </div>
         )}
-
-        {activeTab==="ip vault" && (
-          <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,overflow:"hidden"}}>
-            <IPVault/>
+        {activeTab==="ip vault"&&(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,height:"100%"}}>
+            <IPVaultPanel/>
             <Panel style={{display:"flex",flexDirection:"column"}}>
               <PanelHeader title="ACCESS AUDIT TRAIL" sub="LAST 24H PROBE ATTEMPTS"/>
               <div style={{flex:1,overflow:"auto",padding:"4px 0"}}>
-                {threats.slice(0,20).map((t,i) => {
-                  const def = ATTACK_TYPES[t.type] || ATTACK_TYPES["INJECTION"];
+                {threats.slice(0,20).map((t,i)=>{
+                  const def=ATTACK_TYPES[t.type]||ATTACK_TYPES["INJECTION"];
                   return (
                     <div key={i} style={{padding:"6px 12px",borderBottom:"1px solid var(--border-b)",
                       display:"grid",gridTemplateColumns:"70px 100px 1fr 60px",gap:6,alignItems:"center"}}>
                       <span style={{fontSize:9,color:"var(--text-d)"}}>{t.ts}</span>
                       <span style={{fontSize:9,color:def.color}}>{def.label.split(" ")[0]}</span>
                       <span style={{fontSize:9,color:"var(--text-d)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.target}</span>
-                      <span style={{fontSize:9,textAlign:"right",color:t.blocked?"#00ff41":"#ff0033"}}>
-                        {t.blocked?"BLOCKED":"BREACHED"}
-                      </span>
+                      <span style={{fontSize:9,textAlign:"right",color:t.blocked?"#00ff41":"#ff0033"}}>{t.blocked?"BLOCKED":"BREACHED"}</span>
                     </div>
                   );
                 })}
@@ -690,13 +766,94 @@ export default function App() {
             </Panel>
           </div>
         )}
-
-        {activeTab==="blockchain" && (
-          <div style={{flex:1,overflow:"hidden"}}>
-            <BlockchainLog attestations={attestations}/>
-          </div>
+        {activeTab==="blockchain"&&(
+          <div style={{height:"100%"}}><BlockchainLogPanel attestations={attestations}/></div>
         )}
       </div>
+    </div>
+  );
+}
+
+/* ── ROOT ── */
+export default function App() {
+  const [page,         setPage]         = useState("landing");
+  const [threats,      setThreats]      = useState([]);
+  const [attestations, setAttestations] = useState([
+    {block:"#SOL-9124481",hash:"0xf3a2...d91b",event:"SENTINEL GEN-7 SPAWNED"},
+    {block:"#SOL-9124479",hash:"0xb811...c43a",event:"MUTATION CHECKPOINT SEALED"},
+    {block:"#SOL-9124472",hash:"0x9d04...f7e2",event:"BREACH ATTEMPT — BLOCKED & LOGGED"},
+    {block:"#SOL-9124460",hash:"0x2af1...8b3c",event:"IP ASSET INTEGRITY VERIFIED"},
+    {block:"#SOL-9124451",hash:"0xe77d...1209",event:"VULN PATCH 0x7c DEPLOYED"},
+    {block:"#SOL-9124440",hash:"0x5c3b...a021",event:"ZERO-KNOWLEDGE PROOF SUBMITTED"},
+  ]);
+  const [stats,        setStats]        = useState(null);
+  const [generation,   setGeneration]   = useState(7);
+  const [mutations,    setMutations]    = useState(1284);
+  const [alertActive,  setAlertActive]  = useState(false);
+  const [apiOnline,    setApiOnline]    = useState(false);
+  const fakeIdRef = useRef(1000);
+
+  // Poll backend
+  useEffect(()=>{
+    const poll = async()=>{
+      try{
+        const res = await fetch(`${API_BASE}/threats`,{
+          headers:RECUR_API_KEY?{"x-recur-api-key":RECUR_API_KEY}:{},
+        });
+        if(!res.ok) throw new Error();
+        const data = await res.json();
+        setApiOnline(true);
+        if(data.events?.length>0){
+          const rt = data.events.map(backendEventToThreat);
+          setThreats(prev=>{
+            const ids = new Set(prev.map(t=>t.id));
+            const newOnes = rt.filter(t=>!ids.has(t.id));
+            if(newOnes.length===0) return prev;
+            if(newOnes.some(t=>!t.blocked)) setAlertActive(true);
+            return [...newOnes,...prev].slice(0,40);
+          });
+          const na = data.events.slice(0,6).map(backendEventToAttestation);
+          if(na.length>0) setAttestations(na);
+        }
+        if(data.stats) setStats(data.stats);
+      }catch{ setApiOnline(false); }
+    };
+    poll();
+    const iv=setInterval(poll,5000);
+    return()=>clearInterval(iv);
+  },[]);
+
+  useEffect(()=>{
+    if(!alertActive) return;
+    const t=setTimeout(()=>setAlertActive(false),4000);
+    return()=>clearTimeout(t);
+  },[alertActive]);
+
+  // Lock scroll on dashboard, free it on landing
+  useEffect(()=>{
+    document.body.style.overflow = page==="dashboard"?"hidden":"auto";
+    document.body.style.height   = page==="dashboard"?"100vh":"auto";
+    window.scrollTo(0,0);
+  },[page]);
+
+  return (
+    <>
+      <style>{css}</style>
+      <Scanline/>
+      <BgGrid/>
+      <Nav page={page} setPage={setPage} apiOnline={apiOnline}/>
+
+      {page==="landing" && <Landing setPage={setPage}/>}
+      {page==="dashboard" && (
+        <Dashboard
+          threats={threats}           setThreats={setThreats}
+          attestations={attestations} setAttestations={setAttestations}
+          stats={stats}               generation={generation}
+          mutations={mutations}       setMutations={setMutations}
+          alertActive={alertActive}   setAlertActive={setAlertActive}
+          apiOnline={apiOnline}       fakeIdRef={fakeIdRef}
+        />
+      )}
     </>
   );
 }
