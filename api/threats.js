@@ -50,8 +50,6 @@ export default async function handler(req, res) {
 
   // ── GET: return recent events with stats ──
   if (req.method === "GET") {
-    const apiKey = req.headers["x-recur-api-key"];
-    const secret = process.env.RECUR_API_SECRET;
 
 // GET is public — stats and events are not sensitive
 
