@@ -1,5 +1,5 @@
 {
-  "version": 2,
+ "version": 2,
   "functions": {
     "api/detect.py": {
       "runtime": "vercel-python@0.1.0"
@@ -7,8 +7,5 @@
   },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" }
-  ],
-  "env": {
-    "RECUR_API_SECRET": "@recur_api_secret"
-  }
+  ]
 }
