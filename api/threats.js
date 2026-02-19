@@ -53,9 +53,7 @@ export default async function handler(req, res) {
     const apiKey = req.headers["x-recur-api-key"];
     const secret = process.env.RECUR_API_SECRET;
 
-    if (secret && apiKey !== secret) {
-      return res.status(401).json({ error: "Unauthorised" });
-    }
+// GET is public — stats and events are not sensitive
 
     const limit  = Math.min(parseInt(req.query?.limit || "50"), 200);
     const filter = req.query?.status; // BLOCKED | CLEAN
