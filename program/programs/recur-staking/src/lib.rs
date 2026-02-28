@@ -51,9 +51,18 @@ pub mod recur_staking {
     ) -> Result<()> {
         require!(amount >= MIN_STAKE_NANO, RecurError::InsufficientStake);
 
-        let tier = NodeTier::from_amount(amount)?;
-        let now  = Clock::get()?.unix_timestamp;
+        let stake_account = &mut ctx.accounts.stake_account;
 
+        // Enforce per-wallet max stake
+        let new_total = stake_account.amount.checked_add(amount)
+            .ok_or(RecurError::Overflow)?;
+        require!(new_total <= MAX_STAKE, RecurError::ExceedsMaxStake);
+
+        let tier     = NodeTier::from_amount(new_total)?;
+        let now      = Clock::get()?.unix_timestamp;
+        let is_new   = !stake_account.active; // capture BEFORE we set active = true
+
+        // Transfer tokens from user → stake vault
         let cpi_ctx = CpiContext::new(
             ctx.accounts.token_program.to_account_info(),
             Transfer {
@@ -64,29 +73,34 @@ pub mod recur_staking {
         );
         token::transfer(cpi_ctx, amount)?;
 
-        let stake_account           = &mut ctx.accounts.stake_account;
-        stake_account.staker        = ctx.accounts.staker.key();
-        stake_account.amount        = stake_account.amount
-            .checked_add(amount).ok_or(RecurError::Overflow)?;
+        // If first stake, set staked_at. If topping up, preserve original staked_at
+        // so multiplier activation timer is not reset.
+        if is_new {
+            stake_account.staker        = ctx.accounts.staker.key();
+            stake_account.staked_at     = now;
+            stake_account.last_claim    = now;
+            stake_account.bump          = ctx.bumps.stake_account;
+        }
+
+        stake_account.amount        = new_total;
         stake_account.tier          = tier;
         stake_account.lock_duration = lock.to_seconds();
-        stake_account.staked_at     = now;
         stake_account.unlock_at     = if lock == LockDuration::Flexible {
             0
         } else {
             now + lock.to_seconds()
         };
-        stake_account.last_claim    = now;
         stake_account.auto_compound = auto_compound;
         stake_account.uptime_bps    = 10_000;
         stake_account.active        = true;
-        stake_account.bump          = ctx.bumps.stake_account;
 
         let pool = &mut ctx.accounts.reward_pool;
         pool.total_staked  = pool.total_staked.checked_add(amount)
             .ok_or(RecurError::Overflow)?;
-        pool.total_stakers = pool.total_stakers.checked_add(1)
-            .ok_or(RecurError::Overflow)?;
+        if is_new {
+            pool.total_stakers = pool.total_stakers.checked_add(1)
+                .ok_or(RecurError::Overflow)?;
+        }
 
         emit!(NodeStaked {
             staker:    stake_account.staker,
@@ -131,7 +145,7 @@ pub mod recur_staking {
             token::transfer(cpi_ctx, pending)?;
         }
 
-        // Return staked tokens using correct stake_vault bump
+        // Return staked tokens
         let stake_vault_bump = ctx.accounts.reward_pool.stake_vault_bump;
         let seeds  = &[b"stake_vault".as_ref(), &[stake_vault_bump]];
         let signer = &[&seeds[..]];
@@ -182,24 +196,50 @@ pub mod recur_staking {
         let stake_vault_bump  = ctx.accounts.reward_pool.stake_vault_bump;
 
         if stake_account.auto_compound {
-            // Move rewards from reward_vault → stake_vault, then update accounting
-            let seeds  = &[b"reward_vault".as_ref(), &[reward_vault_bump]];
-            let signer = &[&seeds[..]];
-            let cpi_ctx = CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
-                Transfer {
-                    from:      ctx.accounts.reward_vault.to_account_info(),
-                    to:        ctx.accounts.stake_vault.to_account_info(),
-                    authority: ctx.accounts.reward_vault.to_account_info(),
-                },
-                signer,
-            );
-            token::transfer(cpi_ctx, pending)?;
+            // Enforce max stake cap even when compounding
+            let new_total = stake_account.amount.checked_add(pending)
+                .ok_or(RecurError::Overflow)?;
+            let compound_amount = if new_total > MAX_STAKE {
+                MAX_STAKE.checked_sub(stake_account.amount).ok_or(RecurError::Overflow)?
+            } else {
+                pending
+            };
 
-            stake_account.amount = stake_account.amount
-                .checked_add(pending).ok_or(RecurError::Overflow)?;
-            ctx.accounts.reward_pool.total_staked = ctx.accounts.reward_pool
-                .total_staked.checked_add(pending).ok_or(RecurError::Overflow)?;
+            if compound_amount > 0 {
+                let seeds  = &[b"reward_vault".as_ref(), &[reward_vault_bump]];
+                let signer = &[&seeds[..]];
+                let cpi_ctx = CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from:      ctx.accounts.reward_vault.to_account_info(),
+                        to:        ctx.accounts.stake_vault.to_account_info(),
+                        authority: ctx.accounts.reward_vault.to_account_info(),
+                    },
+                    signer,
+                );
+                token::transfer(cpi_ctx, compound_amount)?;
+                stake_account.amount = stake_account.amount
+                    .checked_add(compound_amount).ok_or(RecurError::Overflow)?;
+                ctx.accounts.reward_pool.total_staked = ctx.accounts.reward_pool
+                    .total_staked.checked_add(compound_amount).ok_or(RecurError::Overflow)?;
+            }
+
+            // Send any overflow rewards (above max stake) directly to wallet
+            let overflow = pending.saturating_sub(compound_amount);
+            if overflow > 0 {
+                let seeds  = &[b"reward_vault".as_ref(), &[reward_vault_bump]];
+                let signer = &[&seeds[..]];
+                let cpi_ctx = CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from:      ctx.accounts.reward_vault.to_account_info(),
+                        to:        ctx.accounts.user_token_account.to_account_info(),
+                        authority: ctx.accounts.reward_vault.to_account_info(),
+                    },
+                    signer,
+                );
+                token::transfer(cpi_ctx, overflow)?;
+            }
         } else {
             // Transfer rewards directly to user wallet
             let seeds  = &[b"reward_vault".as_ref(), &[reward_vault_bump]];
@@ -281,6 +321,7 @@ fn calculate_rewards(
     let elapsed_weeks = elapsed / EPOCH_SECONDS;
     if elapsed_weeks == 0 { return Ok(0); }
 
+    // APY based on lock duration
     let apy_bps = match stake_account.lock_duration {
         0                        => APY_FLEXIBLE as u128,
         l if l == LOCK_3_MONTHS  => APY_3_MONTHS as u128,
@@ -289,11 +330,15 @@ fn calculate_rewards(
         _                        => APY_FLEXIBLE as u128,
     };
 
-    // reward = amount * APY_bps * elapsed_weeks / (52 * 10_000)
+    // Tier multiplier — activates after 3 months
+    let multiplier = stake_account.tier.multiplier_bps(stake_account.staked_at, now) as u128;
+
+    // reward = amount * APY_bps * multiplier * elapsed_weeks / (52 * 10_000 * 10_000)
     let reward = (stake_account.amount as u128)
         .checked_mul(apy_bps).ok_or(RecurError::Overflow)?
+        .checked_mul(multiplier).ok_or(RecurError::Overflow)?
         .checked_mul(elapsed_weeks).ok_or(RecurError::Overflow)?
-        .checked_div(52 * 10_000).ok_or(RecurError::Overflow)? as u64;
+        .checked_div(52 * 10_000 * 10_000).ok_or(RecurError::Overflow)? as u64;
 
     Ok(reward)
 }
