@@ -5,21 +5,24 @@ use crate::constants::*;
 // ── RewardPool ────────────────────────────────────────────────────────────────
 #[account]
 pub struct RewardPool {
-    pub authority:    Pubkey,   // protocol admin
-    pub reward_mint:  Pubkey,   // $RECUR mint
-    pub reward_vault: Pubkey,   // vault holding reward tokens
-    pub reward_rate:  u64,      // base tokens distributed per epoch
-    pub total_staked: u64,      // total $RECUR staked across all positions
-    pub total_stakers: u32,     // number of active stakers
-    pub epoch_start:  i64,      // unix timestamp of current epoch start
-    pub bump:         u8,
+    pub authority:         Pubkey,   // protocol admin
+    pub reward_mint:       Pubkey,   // $RECUR mint
+    pub reward_vault:      Pubkey,   // vault holding reward tokens
+    pub stake_vault:       Pubkey,   // vault holding staked tokens
+    pub reward_rate:       u64,      // base tokens distributed per epoch
+    pub total_staked:      u64,      // total $RECUR staked across all positions
+    pub total_stakers:     u32,      // number of active stakers
+    pub epoch_start:       i64,      // unix timestamp of current epoch start
+    pub pool_bump:         u8,       // PDA bump for reward_pool
+    pub reward_vault_bump: u8,       // PDA bump for reward_vault
+    pub stake_vault_bump:  u8,       // PDA bump for stake_vault
 }
 
 impl RewardPool {
     pub const LEN: usize = 8
-        + 32 + 32 + 32
-        + 8 + 8 + 4 + 8
-        + 1;
+        + 32 + 32 + 32 + 32   // 4 pubkeys
+        + 8 + 8 + 4 + 8       // u64s and u32
+        + 1 + 1 + 1;          // 3 bumps
 }
 
 // ── StakeAccount ──────────────────────────────────────────────────────────────
@@ -33,7 +36,7 @@ pub struct StakeAccount {
     pub unlock_at:       i64,       // timestamp when tokens can be withdrawn
     pub last_claim:      i64,       // timestamp of last reward claim
     pub auto_compound:   bool,      // opt-in auto-compounding
-    pub uptime_bps:      u16,       // node uptime in basis points
+    pub uptime_bps:      u16,       // node uptime in basis points (10000 = 100%)
     pub active:          bool,
     pub bump:            u8,
 }
@@ -52,10 +55,10 @@ impl StakeAccount {
 // ── LockDuration enum ─────────────────────────────────────────────────────────
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
 pub enum LockDuration {
-    Flexible,    // 0 months — 8% APY
-    ThreeMonths, // 3 months — 12% APY
-    SixMonths,   // 6 months — 16% APY
-    TwelveMonths,// 12 months — 20% APY
+    Flexible,     // 0 months  — 8% APY
+    ThreeMonths,  // 3 months  — 12% APY
+    SixMonths,    // 6 months  — 16% APY
+    TwelveMonths, // 12 months — 20% APY
 }
 
 impl LockDuration {
@@ -105,3 +108,5 @@ impl NodeTier {
             NodeTier::Ward  => 17_500,
             NodeTier::Prime => 27_500,
         }
+    }
+}
