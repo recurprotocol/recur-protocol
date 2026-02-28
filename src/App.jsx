@@ -167,17 +167,11 @@ function Nav({page, setPage, apiOnline}) {
       backdropFilter:"blur(16px)",display:"flex",alignItems:"center",
       padding:"0 32px",height:54,gap:32,
     }}>
-      {/* Logo */}
       <div onClick={()=>setPage("landing")} style={{cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center"}}>
         <img src="/logo.png" alt="RECUR" style={{height:36,width:36,objectFit:"contain"}}/>
       </div>
-
-      {/* Divider */}
       <div style={{width:1,height:20,background:"var(--border)"}}/>
-
-      {/* Nav links */}
       <div style={{display:"flex",gap:4,flex:1,alignItems:"center",position:"relative"}}>
-        {/* HOME */}
         <button onClick={()=>setPage("landing")} style={{
           fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",
           cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
@@ -187,7 +181,6 @@ function Nav({page, setPage, apiOnline}) {
           transition:"all 0.2s",
         }}>HOME</button>
 
-        {/* PROTOCOL dropdown */}
         <div style={{position:"relative"}}
           onMouseEnter={()=>setDropOpen(true)}
           onMouseLeave={()=>setDropOpen(false)}>
@@ -195,8 +188,8 @@ function Nav({page, setPage, apiOnline}) {
             fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",
             cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
             background:"transparent",
-            color:(page==="dashboard"||dropOpen)?"#ffffff":"var(--text-d)",
-            borderBottom:(page==="dashboard"||dropOpen)?"2px solid rgba(0,255,65,0.6)":"2px solid transparent",
+            color:(page==="dashboard"||page==="staking"||dropOpen)?"#ffffff":"var(--text-d)",
+            borderBottom:(page==="dashboard"||page==="staking"||dropOpen)?"2px solid rgba(0,255,65,0.6)":"2px solid transparent",
             transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,
           }}>
             PROTOCOL <span style={{fontSize:8,opacity:0.6}}>{dropOpen?"▲":"▼"}</span>
@@ -211,7 +204,6 @@ function Nav({page, setPage, apiOnline}) {
               minWidth:260,
               zIndex:2000,
             }}>
-              {/* Live Threat Dashboard */}
               <div onClick={()=>{setPage("dashboard");setDropOpen(false);}} style={{
                 padding:"12px 16px",cursor:"pointer",
                 borderBottom:"1px solid var(--border-b)",
@@ -228,22 +220,23 @@ function Nav({page, setPage, apiOnline}) {
                   background:"rgba(0,255,65,0.1)",border:"1px solid rgba(0,255,65,0.3)"}}>LIVE</span>
               </div>
 
-              {/* Staking */}
-              <div style={{
-                padding:"12px 16px",
+              {/* STAKING — now clickable */}
+              <div onClick={()=>{setPage("staking");setDropOpen(false);}} style={{
+                padding:"12px 16px",cursor:"pointer",
                 borderBottom:"1px solid var(--border-b)",
                 display:"flex",justifyContent:"space-between",alignItems:"center",
-                opacity:0.5,cursor:"default",
-              }}>
+                transition:"background 0.15s",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,255,65,0.05)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 <div>
                   <div style={{fontFamily:"'Fira Code',monospace",fontSize:10,color:"#ffffff",letterSpacing:1}}>STAKING</div>
                   <div style={{fontSize:9,color:"var(--text-d)",marginTop:2}}>Run sentinel nodes, earn from the network</div>
                 </div>
-                <span style={{fontSize:9,color:"#ffc300",letterSpacing:1,padding:"2px 6px",
-                  background:"rgba(255,195,0,0.08)",border:"1px solid rgba(255,195,0,0.3)"}}>SOON</span>
+                <span style={{fontSize:9,color:"#00ff41",letterSpacing:1,padding:"2px 6px",
+                  background:"rgba(0,255,65,0.1)",border:"1px solid rgba(0,255,65,0.3)"}}>LIVE</span>
               </div>
 
-              {/* On-Chain Attestation */}
               <div style={{
                 padding:"12px 16px",
                 display:"flex",justifyContent:"space-between",alignItems:"center",
@@ -261,7 +254,6 @@ function Nav({page, setPage, apiOnline}) {
         </div>
       </div>
 
-      {/* Network status */}
       <div style={{display:"flex",alignItems:"center",gap:6,fontSize:9}}>
         <div style={{
           width:7,height:7,borderRadius:"50%",flexShrink:0,
@@ -274,7 +266,6 @@ function Nav({page, setPage, apiOnline}) {
         </span>
       </div>
 
-      {/* CTA button */}
       {page==="landing" && (
         <button onClick={()=>setPage("dashboard")} style={{
           fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:3,
@@ -287,6 +278,276 @@ function Nav({page, setPage, apiOnline}) {
         >VIEW DASHBOARD →</button>
       )}
     </nav>
+  );
+}
+
+/* ── STAKING PAGE ── */
+function Staking({setPage}) {
+  const [selectedLock, setSelectedLock] = useState(null);
+  const [selectedTier, setSelectedTier] = useState(null);
+  const [autoCompound, setAutoCompound] = useState(false);
+
+  const lockTiers = [
+    {id:"flexible", label:"FLEXIBLE",    duration:"No lock",   apy:"8%",  color:"#00b4d8", desc:"Withdraw anytime. No penalties. Rewards paid weekly every Sunday 12:00 UTC."},
+    {id:"3mo",      label:"3 MONTHS",    duration:"90 days",   apy:"12%", color:"#00ff41", desc:"Tokens locked for 90 days. Higher yield rewarded for commitment to the network."},
+    {id:"6mo",      label:"6 MONTHS",    duration:"180 days",  apy:"16%", color:"#ffc300", desc:"Tokens locked for 180 days. Significant APY boost for long-term protocol alignment."},
+    {id:"12mo",     label:"12 MONTHS",   duration:"365 days",  apy:"20%", color:"#ff6b00", desc:"Maximum lock. Maximum yield. 12-month commitment to securing the RECUR network."},
+  ];
+
+  const nodeTiers = [
+    {id:"nano",  label:"NANO",  min:"10,000",    mult:"1.0x",  slots:"Unlimited", color:"#00b4d8", desc:"Entry-level sentinel node. Access to basic network participation and weekly rewards. Multiplier active immediately."},
+    {id:"ward",  label:"WARD",  min:"100,000",   mult:"1.25x", slots:"Unlimited", color:"#00ff41", desc:"Mid-tier operator node. 1.25x reward multiplier activates automatically after 3 months of staking."},
+    {id:"prime", label:"PRIME", min:"1,000,000", mult:"1.5x",  slots:"Unlimited", color:"#ffc300", desc:"Elite sentinel node. Maximum 1.5x multiplier activates after 3 months. Hard cap of 1,000,000 $RECUR per wallet."},
+  ];
+
+  const stats = [
+    {label:"TOTAL STAKED",      value:"—",          sub:"$RECUR"},
+    {label:"ACTIVE STAKERS",    value:"—",          sub:"NODES"},
+    {label:"REWARDS DISTRIBUTED",value:"—",         sub:"$RECUR"},
+    {label:"NEXT PAYOUT",       value:"SUNDAY",     sub:"12:00 UTC"},
+    {label:"REWARD TOKEN",      value:"$RECUR",     sub:"→ $RECUR"},
+    {label:"NETWORK",           value:"SOLANA",     sub:"DEVNET SOON"},
+  ];
+
+  return (
+    <div style={{position:"relative",zIndex:1,minHeight:"100vh",paddingTop:54,overflowY:"auto"}}>
+
+      {/* Hero */}
+      <section style={{padding:"60px 64px 40px",maxWidth:1100,margin:"0 auto"}}>
+        <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10,
+          border:"1px solid var(--border)",display:"inline-block",padding:"4px 14px"}}>
+          SENTINEL NODE STAKING
+        </div>
+        <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:"clamp(48px,6vw,80px)",
+          letterSpacing:8,color:"#ffffff",marginBottom:14,lineHeight:1}}>
+          STAKE $RECUR.<br/>
+          <span style={{color:"var(--green)"}}>SECURE THE NETWORK.</span>
+        </h1>
+        <p style={{fontSize:11,color:"var(--text-d)",maxWidth:560,lineHeight:1.9,marginBottom:0}}>
+          Lock $RECUR tokens to operate sentinel nodes and earn weekly rewards. Choose your lock duration — longer commitment, higher yield. Auto-compound available.
+        </p>
+      </section>
+
+      {/* Stats bar */}
+      <section style={{padding:"0 64px",maxWidth:1100,margin:"0 auto 40px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>
+          {stats.map((s,i)=>(
+            <Panel key={i} style={{padding:"14px 12px",textAlign:"center"}}>
+              <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:1,marginBottom:6}}>{s.label}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:"#ffffff",
+                letterSpacing:2,lineHeight:1}}>{s.value}</div>
+              <div style={{fontSize:9,color:"var(--text-d)",marginTop:4,letterSpacing:1}}>{s.sub}</div>
+            </Panel>
+          ))}
+        </div>
+      </section>
+
+      {/* Lock Duration */}
+      <section style={{padding:"0 64px",maxWidth:1100,margin:"0 auto 40px"}}>
+        <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>STEP 1</div>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,letterSpacing:4,color:"#ffffff",marginBottom:20}}>
+          SELECT LOCK DURATION
+        </h2>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+          {lockTiers.map((t)=>{
+            const selected = selectedLock===t.id;
+            return (
+              <div key={t.id} onClick={()=>setSelectedLock(t.id)} style={{
+                background:selected?"rgba(0,255,65,0.06)":"var(--bg2)",
+                border:`1px solid ${selected?t.color:"var(--border)"}`,
+                borderTop:`3px solid ${selected?t.color:"transparent"}`,
+                padding:"22px 18px",cursor:"pointer",transition:"all 0.2s",
+                boxShadow:selected?`0 0 20px ${t.color}22`:"none",
+              }}
+              onMouseEnter={e=>{if(!selected)e.currentTarget.style.borderColor="rgba(0,255,65,0.3)"}}
+              onMouseLeave={e=>{if(!selected)e.currentTarget.style.borderColor="var(--border)"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:3,color:"#ffffff"}}>{t.label}</div>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,color:t.color,
+                    textShadow:`0 0 20px ${t.color}`,letterSpacing:2}}>{t.apy}</div>
+                </div>
+                <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,marginBottom:10}}>{t.duration} · APY</div>
+                <div style={{fontSize:10,color:"var(--text-d)",lineHeight:1.7}}>{t.desc}</div>
+                {selected&&(
+                  <div style={{marginTop:12,fontSize:9,color:t.color,letterSpacing:2,
+                    padding:"3px 8px",border:`1px solid ${t.color}44`,display:"inline-block",
+                    background:`${t.color}11`}}>✓ SELECTED</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Node Tier */}
+      <section style={{padding:"0 64px",maxWidth:1100,margin:"0 auto 40px"}}>
+        <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>STEP 2</div>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,letterSpacing:4,color:"#ffffff",marginBottom:20}}>
+          SELECT NODE TIER
+        </h2>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+          {nodeTiers.map((t)=>{
+            const selected = selectedTier===t.id;
+            return (
+              <div key={t.id} onClick={()=>setSelectedTier(t.id)} style={{
+                background:selected?"rgba(0,255,65,0.06)":"var(--bg2)",
+                border:`1px solid ${selected?t.color:"var(--border)"}`,
+                borderTop:`3px solid ${selected?t.color:"transparent"}`,
+                padding:"26px 22px",cursor:"pointer",transition:"all 0.2s",
+                boxShadow:selected?`0 0 20px ${t.color}22`:"none",
+              }}
+              onMouseEnter={e=>{if(!selected)e.currentTarget.style.borderColor="rgba(0,255,65,0.3)"}}
+              onMouseLeave={e=>{if(!selected)e.currentTarget.style.borderColor="var(--border)"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,letterSpacing:4,color:t.color,
+                    textShadow:`0 0 16px ${t.color}`}}>{t.label}</div>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,color:"#ffffff",letterSpacing:2}}>{t.mult}</div>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}}>
+                  <div style={{padding:"8px",background:"rgba(0,255,65,0.03)",border:"1px solid var(--border-b)"}}>
+                    <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:1,marginBottom:4}}>MIN STAKE</div>
+                    <div style={{fontSize:13,color:"#ffffff",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:2}}>{t.min}</div>
+                    <div style={{fontSize:9,color:"var(--text-d)"}}>$RECUR</div>
+                  </div>
+                  <div style={{padding:"8px",background:"rgba(0,255,65,0.03)",border:"1px solid var(--border-b)"}}>
+                    <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:1,marginBottom:4}}>SLOTS</div>
+                    <div style={{fontSize:13,color:"#ffffff",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:2}}>{t.slots}</div>
+                    <div style={{fontSize:9,color:"var(--text-d)"}}>AVAILABLE</div>
+                  </div>
+                </div>
+                <div style={{fontSize:10,color:"var(--text-d)",lineHeight:1.7}}>{t.desc}</div>
+                {selected&&(
+                  <div style={{marginTop:12,fontSize:9,color:t.color,letterSpacing:2,
+                    padding:"3px 8px",border:`1px solid ${t.color}44`,display:"inline-block",
+                    background:`${t.color}11`}}>✓ SELECTED</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Auto-compound + Connect */}
+      <section style={{padding:"0 64px",maxWidth:1100,margin:"0 auto 40px"}}>
+        <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>STEP 3</div>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,letterSpacing:4,color:"#ffffff",marginBottom:20}}>
+          CONFIGURE & STAKE
+        </h2>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+
+          {/* Auto-compound toggle */}
+          <Panel style={{padding:"24px"}}>
+            <PanelHeader title="AUTO-COMPOUND" sub="REINVEST REWARDS BACK INTO STAKE"/>
+            <div style={{padding:"20px 0 0"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+                <div>
+                  <div style={{fontSize:11,color:"var(--bright)",marginBottom:4}}>Auto-compounding</div>
+                  <div style={{fontSize:10,color:"var(--text-d)",lineHeight:1.7}}>
+                    When enabled, your weekly $RECUR rewards are automatically restaked rather than sent to your wallet. Compounds your position every Sunday.
+                  </div>
+                </div>
+                <div onClick={()=>setAutoCompound(!autoCompound)} style={{
+                  width:44,height:24,borderRadius:12,cursor:"pointer",flexShrink:0,marginLeft:20,
+                  background:autoCompound?"rgba(0,255,65,0.3)":"rgba(0,255,65,0.06)",
+                  border:`1px solid ${autoCompound?"rgba(0,255,65,0.6)":"var(--border)"}`,
+                  position:"relative",transition:"all 0.2s",
+                }}>
+                  <div style={{
+                    position:"absolute",top:3,left:autoCompound?22:3,width:16,height:16,borderRadius:"50%",
+                    background:autoCompound?"#00ff41":"var(--text-d)",transition:"all 0.2s",
+                    boxShadow:autoCompound?"0 0 8px #00ff41":"none",
+                  }}/>
+                </div>
+              </div>
+              <div style={{padding:"10px 12px",background:"rgba(0,255,65,0.03)",border:"1px solid var(--border-b)",
+                fontSize:9,color:"var(--text-d)",lineHeight:1.7}}>
+                {autoCompound
+                  ?"● AUTO-COMPOUND ON — Rewards reinvested weekly. Your stake grows automatically."
+                  :"○ AUTO-COMPOUND OFF — Rewards sent to your wallet every Sunday 12:00 UTC."}
+              </div>
+            </div>
+          </Panel>
+
+          {/* Stake summary + CTA */}
+          <Panel style={{padding:"24px"}}>
+            <PanelHeader title="STAKE SUMMARY" sub="REVIEW YOUR CONFIGURATION"/>
+            <div style={{padding:"20px 0 0"}}>
+              <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
+                {[
+                  {label:"Lock Duration", value:selectedLock?lockTiers.find(t=>t.id===selectedLock)?.label:"—"},
+                  {label:"APY",           value:selectedLock?lockTiers.find(t=>t.id===selectedLock)?.apy:"—"},
+                  {label:"Node Tier",     value:selectedTier?nodeTiers.find(t=>t.id===selectedTier)?.label:"—"},
+                  {label:"Multiplier",    value:selectedTier?nodeTiers.find(t=>t.id===selectedTier)?.mult:"—"},
+                  {label:"Auto-Compound", value:autoCompound?"ENABLED":"DISABLED"},
+                  {label:"Reward Token",  value:"$RECUR"},
+                  {label:"Payout",        value:"SUNDAY 12:00 UTC"},
+                ].map((row,i)=>(
+                  <div key={i} style={{display:"flex",justifyContent:"space-between",
+                    padding:"6px 0",borderBottom:"1px solid var(--border-b)"}}>
+                    <span style={{fontSize:10,color:"var(--text-d)",letterSpacing:1}}>{row.label}</span>
+                    <span style={{fontSize:10,color:"#ffffff",letterSpacing:1}}>{row.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Connect wallet CTA */}
+              <div style={{padding:"14px 16px",background:"rgba(0,255,65,0.04)",
+                border:"1px solid rgba(0,255,65,0.2)",marginBottom:12,textAlign:"center"}}>
+                <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,marginBottom:6}}>
+                  DEVNET DEPLOYMENT IN PROGRESS
+                </div>
+                <div style={{fontSize:10,color:"var(--text-d)",lineHeight:1.6}}>
+                  Staking goes live on Solana devnet shortly. Connect your wallet to be notified at launch.
+                </div>
+              </div>
+
+              <button style={{
+                width:"100%",fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:4,
+                padding:"14px",background:"rgba(0,255,65,0.1)",color:"#ffffff",
+                border:"1px solid rgba(0,255,65,0.4)",cursor:"not-allowed",opacity:0.7,
+              }}>
+                CONNECT WALLET — COMING SOON
+              </button>
+            </div>
+          </Panel>
+        </div>
+      </section>
+
+      {/* Reward schedule info */}
+      <section style={{padding:"0 64px 40px",maxWidth:1100,margin:"0 auto"}}>
+        <Panel style={{padding:"28px 32px"}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:32}}>
+            {[
+              {icon:"01",title:"STAKE $RECUR",       desc:"Choose your lock duration and node tier. Minimum 10,000 $RECUR to participate as a NANO sentinel node."},
+              {icon:"02",title:"RUN YOUR NODE",       desc:"Your staked position registers you as an active sentinel operator in the RECUR detection network."},
+              {icon:"03",title:"EARN WEEKLY",         desc:"Rewards calculated on your stake amount, tier multiplier, and lock APY. Distributed every Sunday 12:00 UTC."},
+              {icon:"04",title:"COMPOUND OR CLAIM",   desc:"Opt in to auto-compounding to grow your stake automatically, or claim $RECUR directly to your wallet each week."},
+            ].map((s,i)=>(
+              <div key={i}>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:48,color:"rgba(0,255,65,0.1)",
+                  lineHeight:1,marginBottom:10,letterSpacing:4}}>{s.icon}</div>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:3,
+                  color:"#ffffff",marginBottom:8}}>{s.title}</div>
+                <div style={{fontSize:10,color:"var(--text-d)",lineHeight:1.8}}>{s.desc}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </section>
+
+      {/* Footer */}
+      <footer style={{borderTop:"1px solid var(--border-b)",padding:"24px 64px",
+        display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,letterSpacing:5,color:"var(--text-d)"}}>
+          RECUR PROTOCOL
+        </div>
+        <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>BUILT FOR SOLANA · {new Date().getFullYear()}</div>
+        <a href="https://github.com/luxioxau/recur-protocol" target="_blank" rel="noreferrer"
+          style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,textDecoration:"none",transition:"color 0.2s"}}
+          onMouseEnter={e=>e.target.style.color="#ffffff"}
+          onMouseLeave={e=>e.target.style.color="var(--text-d)"}>GITHUB ↗</a>
+      </footer>
+    </div>
   );
 }
 
@@ -319,25 +580,20 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
 
   return (
     <div style={{position:"relative",zIndex:1,minHeight:"100vh",paddingTop:54}}>
-
-      {/* ── HERO ── */}
       <section style={{minHeight:"calc(100vh - 54px)",display:"flex",flexDirection:"column",
         alignItems:"center",justifyContent:"center",padding:"60px 40px",textAlign:"center",position:"relative"}}>
         <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-60%)",
           width:800,height:600,pointerEvents:"none",
           background:"radial-gradient(ellipse,rgba(0,255,65,0.08) 0%,transparent 65%)"}}/>
-
         <div style={{fontSize:9,letterSpacing:7,color:"var(--text-d)",border:"1px solid var(--border)",
           padding:"5px 18px",marginBottom:36,animation:"fade-up 0.5s ease both",borderRadius:1}}>
           RECURSIVE AI SECURITY SENTINELS
         </div>
-
         <h1 style={{fontFamily:"'Bebas Neue',sans-serif",lineHeight:0.9,marginBottom:28,
           fontSize:"clamp(80px,15vw,170px)",letterSpacing:18,color:"#ffffff",
           animation:"fade-up 0.7s ease 0.1s both"}}>
           RECUR
         </h1>
-
         <p style={{fontFamily:"'Fira Code',monospace",fontSize:14,color:"var(--text)",maxWidth:520,
           lineHeight:1.9,marginBottom:10,animation:"fade-up 0.7s ease 0.2s both",opacity:0}}>
           Self-evolving sentinel agents that detect, block, and learn from adversarial attacks on AI systems.
@@ -346,7 +602,6 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
           lineHeight:1.8,marginBottom:52,letterSpacing:1,animation:"fade-up 0.7s ease 0.3s both",opacity:0}}>
           Built for Solana · OpenAI &amp; Anthropic compatible · Immutable on-chain proofs
         </p>
-
         <div style={{display:"flex",gap:14,flexWrap:"wrap",justifyContent:"center",
           animation:"fade-up 0.7s ease 0.4s both",opacity:0}}>
           <button onClick={()=>setPage("dashboard")} style={{
@@ -366,12 +621,10 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
             GITHUB ↗
           </a>
         </div>
-
         <div style={{position:"absolute",bottom:28,fontSize:9,color:"var(--text-d)",
           letterSpacing:4,animation:"fade-up 1s ease 1.4s both",opacity:0}}>SCROLL ↓</div>
       </section>
 
-      {/* ── STATS ── */}
       <section style={{borderTop:"1px solid var(--border)",borderBottom:"1px solid var(--border)",
         background:"rgba(0,255,65,0.015)",display:"grid",gridTemplateColumns:"repeat(4,1fr)"}}>
         {[{v:"5",l:"Attack Categories"},{v:"40+",l:"Detection Signatures"},{v:"<5ms",l:"Latency Overhead"},{v:"SOL",l:"Chain"}]
@@ -385,7 +638,6 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         ))}
       </section>
 
-      {/* ── HOW IT WORKS ── */}
       <section style={{padding:"80px 64px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>HOW IT WORKS</div>
         <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#ffffff",marginBottom:48}}>
@@ -408,7 +660,6 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         </div>
       </section>
 
-      {/* ── FEATURES ── */}
       <section style={{padding:"0 64px 80px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>CAPABILITIES</div>
         <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#ffffff",marginBottom:44}}>
@@ -428,7 +679,6 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         </div>
       </section>
 
-      {/* ── INTEGRATION CODE ── */}
       <section style={{padding:"0 64px 80px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>INTEGRATION</div>
         <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#ffffff",marginBottom:32}}>
@@ -447,7 +697,6 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         </Panel>
       </section>
 
-      {/* ── SENTINEL PREVIEW ── */}
       <section style={{padding:"0 64px 80px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10}}>ARCHITECTURE</div>
         <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:4,color:"#ffffff",marginBottom:36}}>
@@ -491,7 +740,6 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         </div>
       </section>
 
-      {/* ── CTA ── */}
       <section style={{borderTop:"1px solid var(--border)",padding:"80px 64px",
         textAlign:"center",background:"rgba(0,255,65,0.01)"}}>
         <button onClick={()=>setPage("dashboard")} style={{
@@ -504,7 +752,6 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
         </button>
       </section>
 
-      {/* ── FOOTER ── */}
       <footer style={{borderTop:"1px solid var(--border-b)",padding:"24px 64px",
         display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,letterSpacing:5,color:"var(--text-d)"}}>
@@ -723,7 +970,6 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
         </div>
       )}
 
-      {/* Metrics bar */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>
         {metrics.map((m,i)=>(
           <Panel key={i} style={{padding:"10px 12px",textAlign:"center"}}>
@@ -734,7 +980,6 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
         ))}
       </div>
 
-      {/* Tabs */}
       <div style={{display:"flex",gap:2}}>
         {tabs.map(tab=>(
           <button key={tab} onClick={()=>setActiveTab(tab)} style={{
@@ -747,7 +992,6 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
         ))}
       </div>
 
-      {/* Content */}
       <div style={{flex:1,overflow:"hidden",minHeight:0}}>
         {activeTab==="overview"&&(
           <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:8,height:"100%"}}>
@@ -859,7 +1103,6 @@ export default function App() {
   const [apiOnline,    setApiOnline]    = useState(false);
   const fakeIdRef = useRef(1000);
 
-  // Poll backend
   useEffect(()=>{
     const poll = async()=>{
       try{
@@ -895,7 +1138,6 @@ export default function App() {
     return()=>clearTimeout(t);
   },[alertActive]);
 
-  // Lock scroll on dashboard, free it on landing
   useEffect(()=>{
     document.body.style.overflow = page==="dashboard"?"hidden":"auto";
     document.body.style.height   = page==="dashboard"?"100vh":"auto";
@@ -909,7 +1151,8 @@ export default function App() {
       <BgGrid/>
       <Nav page={page} setPage={setPage} apiOnline={apiOnline}/>
 
-      {page==="landing" && <Landing setPage={setPage}/>}
+      {page==="landing"   && <Landing setPage={setPage}/>}
+      {page==="staking"   && <Staking setPage={setPage}/>}
       {page==="dashboard" && (
         <Dashboard
           threats={threats}           setThreats={setThreats}
