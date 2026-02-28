@@ -25,4 +25,6 @@ pub enum RecurError {
 
     #[msg("Arithmetic overflow")]
     Overflow,
+    #[msg("Stake amount exceeds maximum allowed per wallet (1,000,000 $RECUR)")]
+    ExceedsMaxStake,
 }
