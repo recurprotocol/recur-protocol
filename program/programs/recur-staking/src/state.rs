@@ -13,9 +13,9 @@ pub struct RewardPool {
     pub total_staked:      u64,      // total $RECUR staked across all positions
     pub total_stakers:     u32,      // number of active stakers
     pub epoch_start:       i64,      // unix timestamp of current epoch start
-    pub pool_bump:         u8,       // PDA bump for reward_pool
-    pub reward_vault_bump: u8,       // PDA bump for reward_vault
-    pub stake_vault_bump:  u8,       // PDA bump for stake_vault
+    pub pool_bump:         u8,
+    pub reward_vault_bump: u8,
+    pub stake_vault_bump:  u8,
 }
 
 impl RewardPool {
@@ -32,7 +32,7 @@ pub struct StakeAccount {
     pub amount:          u64,       // total $RECUR staked
     pub tier:            NodeTier,
     pub lock_duration:   i64,       // 0 = flexible, else seconds locked
-    pub staked_at:       i64,       // timestamp of stake
+    pub staked_at:       i64,       // timestamp of initial stake
     pub unlock_at:       i64,       // timestamp when tokens can be withdrawn
     pub last_claim:      i64,       // timestamp of last reward claim
     pub auto_compound:   bool,      // opt-in auto-compounding
@@ -55,7 +55,7 @@ impl StakeAccount {
 // ── LockDuration enum ─────────────────────────────────────────────────────────
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
 pub enum LockDuration {
-    Flexible,     // 0 months  — 8% APY
+    Flexible,     // 0 months  —  8% APY
     ThreeMonths,  // 3 months  — 12% APY
     SixMonths,    // 6 months  — 16% APY
     TwelveMonths, // 12 months — 20% APY
@@ -84,9 +84,9 @@ impl LockDuration {
 // ── NodeTier ──────────────────────────────────────────────────────────────────
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
 pub enum NodeTier {
-    Nano,   // >= 1,000  $RECUR
-    Ward,   // >= 10,000 $RECUR
-    Prime,  // >= 50,000 $RECUR
+    Nano,   // >= 10,000  $RECUR
+    Ward,   // >= 100,000 $RECUR — 1.25x after 3 months
+    Prime,  // >= 1,000,000 $RECUR — 1.5x after 3 months
 }
 
 impl NodeTier {
@@ -102,11 +102,18 @@ impl NodeTier {
         }
     }
 
-    pub fn multiplier_bps(&self) -> u16 {
+    /// Returns multiplier in basis points.
+    /// WARD and PRIME multipliers only activate after MULTIPLIER_ACTIVATION_PERIOD.
+    pub fn multiplier_bps(&self, staked_at: i64, now: i64) -> u16 {
+        let elapsed = now - staked_at;
         match self {
-            NodeTier::Nano  => 10_000,
-            NodeTier::Ward  => 17_500,
-            NodeTier::Prime => 27_500,
+            NodeTier::Nano  => MULTIPLIER_NANO,
+            NodeTier::Ward  => {
+                if elapsed >= MULTIPLIER_ACTIVATION_PERIOD { MULTIPLIER_WARD } else { MULTIPLIER_NANO }
+            },
+            NodeTier::Prime => {
+                if elapsed >= MULTIPLIER_ACTIVATION_PERIOD { MULTIPLIER_PRIME } else { MULTIPLIER_NANO }
+            },
         }
     }
 }
