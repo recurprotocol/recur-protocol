@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 
-declare_id!("RECURXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx"); // replace after deploy
+declare_id!("RECURXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx"); // replace after first deploy
 
 pub mod constants;
 pub mod errors;
@@ -130,31 +130,33 @@ pub mod recur_staking {
         // Pay out any pending rewards first
         let pending = calculate_rewards(stake_account, &ctx.accounts.reward_pool, now)?;
         if pending > 0 {
-            let reward_vault_bump = ctx.accounts.reward_pool.reward_vault_bump;
-            let seeds  = &[b"reward_vault".as_ref(), &[reward_vault_bump]];
+            // FIX: reward_pool is the token authority for reward_vault, not the vault itself
+            let pool_bump = ctx.accounts.reward_pool.pool_bump;
+            let seeds  = &[b"reward_pool".as_ref(), &[pool_bump]];
             let signer = &[&seeds[..]];
             let cpi_ctx = CpiContext::new_with_signer(
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
                     from:      ctx.accounts.reward_vault.to_account_info(),
                     to:        ctx.accounts.user_token_account.to_account_info(),
-                    authority: ctx.accounts.reward_vault.to_account_info(),
+                    authority: ctx.accounts.reward_pool.to_account_info(),
                 },
                 signer,
             );
             token::transfer(cpi_ctx, pending)?;
+            stake_account.last_claim = now;
         }
 
-        // Return staked tokens
-        let stake_vault_bump = ctx.accounts.reward_pool.stake_vault_bump;
-        let seeds  = &[b"stake_vault".as_ref(), &[stake_vault_bump]];
+        // Return staked tokens — reward_pool is also the token authority for stake_vault
+        let pool_bump = ctx.accounts.reward_pool.pool_bump;
+        let seeds  = &[b"reward_pool".as_ref(), &[pool_bump]];
         let signer = &[&seeds[..]];
         let cpi_ctx = CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
             Transfer {
                 from:      ctx.accounts.stake_vault.to_account_info(),
                 to:        ctx.accounts.user_token_account.to_account_info(),
-                authority: ctx.accounts.stake_vault.to_account_info(),
+                authority: ctx.accounts.reward_pool.to_account_info(),
             },
             signer,
         );
@@ -162,7 +164,6 @@ pub mod recur_staking {
 
         stake_account.amount = stake_account.amount
             .checked_sub(amount).ok_or(RecurError::Overflow)?;
-        stake_account.last_claim = now;
 
         if stake_account.amount == 0 {
             stake_account.active = false;
@@ -192,8 +193,7 @@ pub mod recur_staking {
         let pending = calculate_rewards(stake_account, &ctx.accounts.reward_pool, now)?;
         require!(pending > 0, RecurError::NoPendingRewards);
 
-        let reward_vault_bump = ctx.accounts.reward_pool.reward_vault_bump;
-        let stake_vault_bump  = ctx.accounts.reward_pool.stake_vault_bump;
+        let pool_bump = ctx.accounts.reward_pool.pool_bump;
 
         if stake_account.auto_compound {
             // Enforce max stake cap even when compounding
@@ -206,14 +206,15 @@ pub mod recur_staking {
             };
 
             if compound_amount > 0 {
-                let seeds  = &[b"reward_vault".as_ref(), &[reward_vault_bump]];
+                // Move rewards from reward_vault → stake_vault (compounding)
+                let seeds  = &[b"reward_pool".as_ref(), &[pool_bump]];
                 let signer = &[&seeds[..]];
                 let cpi_ctx = CpiContext::new_with_signer(
                     ctx.accounts.token_program.to_account_info(),
                     Transfer {
                         from:      ctx.accounts.reward_vault.to_account_info(),
                         to:        ctx.accounts.stake_vault.to_account_info(),
-                        authority: ctx.accounts.reward_vault.to_account_info(),
+                        authority: ctx.accounts.reward_pool.to_account_info(),
                     },
                     signer,
                 );
@@ -227,14 +228,14 @@ pub mod recur_staking {
             // Send any overflow rewards (above max stake) directly to wallet
             let overflow = pending.saturating_sub(compound_amount);
             if overflow > 0 {
-                let seeds  = &[b"reward_vault".as_ref(), &[reward_vault_bump]];
+                let seeds  = &[b"reward_pool".as_ref(), &[pool_bump]];
                 let signer = &[&seeds[..]];
                 let cpi_ctx = CpiContext::new_with_signer(
                     ctx.accounts.token_program.to_account_info(),
                     Transfer {
                         from:      ctx.accounts.reward_vault.to_account_info(),
                         to:        ctx.accounts.user_token_account.to_account_info(),
-                        authority: ctx.accounts.reward_vault.to_account_info(),
+                        authority: ctx.accounts.reward_pool.to_account_info(),
                     },
                     signer,
                 );
@@ -242,14 +243,14 @@ pub mod recur_staking {
             }
         } else {
             // Transfer rewards directly to user wallet
-            let seeds  = &[b"reward_vault".as_ref(), &[reward_vault_bump]];
+            let seeds  = &[b"reward_pool".as_ref(), &[pool_bump]];
             let signer = &[&seeds[..]];
             let cpi_ctx = CpiContext::new_with_signer(
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
                     from:      ctx.accounts.reward_vault.to_account_info(),
                     to:        ctx.accounts.user_token_account.to_account_info(),
-                    authority: ctx.accounts.reward_vault.to_account_info(),
+                    authority: ctx.accounts.reward_pool.to_account_info(),
                 },
                 signer,
             );
