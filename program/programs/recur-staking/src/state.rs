@@ -83,16 +83,16 @@ impl NodeTier {
 
     /// Reward multiplier in basis points — activates after 3 months staking
     /// Before activation: all tiers get 1.0x (10000 bps)
-    /// After activation:  Nano 1.0x, Ward 1.75x, Prime 2.75x
+    /// After activation:  Nano 1.0x, Ward 1.25x, Prime 1.5x
     pub fn multiplier_bps(&self, staked_at: i64, now: i64) -> u16 {
         let elapsed = now.saturating_sub(staked_at);
-        if elapsed < MULTIPLIER_ACTIVATION_SECONDS {
-            return 10_000; // 1.0x until activation
+        if elapsed < MULTIPLIER_ACTIVATION_PERIOD {
+            return MULTIPLIER_NANO; // 1.0x until activation
         }
         match self {
-            NodeTier::Nano  => 10_000,
-            NodeTier::Ward  => 17_500,
-            NodeTier::Prime => 27_500,
+            NodeTier::Nano  => MULTIPLIER_NANO,
+            NodeTier::Ward  => MULTIPLIER_WARD,
+            NodeTier::Prime => MULTIPLIER_PRIME,
         }
     }
 }
