@@ -5,7 +5,10 @@ pub enum RecurError {
     #[msg("Stake amount below minimum threshold for any node tier")]
     InsufficientStake,
 
-    #[msg("Tokens are still within the lock period")]
+    #[msg("Stake amount exceeds maximum allowed per wallet (1,000,000 $RECUR)")]
+    ExceedsMaxStake,
+
+    #[msg("Tokens are still locked — wait until unlock_at")]
     LockPeriodActive,
 
     #[msg("No pending rewards to claim")]
@@ -20,11 +23,6 @@ pub enum RecurError {
     #[msg("Uptime value must be between 0 and 10000 basis points")]
     InvalidUptime,
 
-    #[msg("Invalid lock duration selected")]
-    InvalidLockDuration,
-
     #[msg("Arithmetic overflow")]
     Overflow,
-    #[msg("Stake amount exceeds maximum allowed per wallet (1,000,000 $RECUR)")]
-    ExceedsMaxStake,
 }
