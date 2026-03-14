@@ -84,14 +84,27 @@ pub mod recur_staking {
 
         stake_account.amount        = new_total;
         stake_account.tier          = tier;
-        stake_account.lock_duration = lock.to_seconds();
-        stake_account.unlock_at     = if lock == LockDuration::Flexible {
-            0
+
+        // CRITICAL FIX: On top-up, never allow shortening the lock.
+        // Only update lock if this is a new stake OR the new lock is longer.
+        if is_new {
+            stake_account.lock_duration = lock.to_seconds();
+            stake_account.unlock_at     = if lock == LockDuration::Flexible {
+                0
+            } else {
+                now + lock.to_seconds()
+            };
+            stake_account.uptime_bps    = 10_000;
         } else {
-            now + lock.to_seconds()
-        };
+            let new_lock = lock.to_seconds();
+            if new_lock > stake_account.lock_duration {
+                stake_account.lock_duration = new_lock;
+                stake_account.unlock_at     = now + new_lock;
+            }
+            // uptime_bps is NOT reset on top-up — preserves slashing penalties
+        }
+
         stake_account.auto_compound = auto_compound;
-        stake_account.uptime_bps    = 10_000;
         stake_account.active        = true;
 
         let pool = &mut ctx.accounts.reward_pool;
@@ -121,6 +134,7 @@ pub mod recur_staking {
         let stake_account = &mut ctx.accounts.stake_account;
         let now           = Clock::get()?.unix_timestamp;
 
+        require!(amount > 0, RecurError::InsufficientStake);
         require!(
             stake_account.lock_duration == 0 || now >= stake_account.unlock_at,
             RecurError::LockPeriodActive
@@ -394,7 +408,7 @@ pub struct StakeCtx<'info> {
     #[account(mut, seeds = [b"reward_pool"], bump = reward_pool.pool_bump)]
     pub reward_pool: Account<'info, RewardPool>,
 
-    #[account(mut)]
+    #[account(mut, constraint = user_token_account.mint == reward_pool.reward_mint)]
     pub user_token_account: Account<'info, TokenAccount>,
 
     #[account(mut, seeds = [b"stake_vault"], bump = reward_pool.stake_vault_bump)]
@@ -416,7 +430,7 @@ pub struct Unstake<'info> {
     #[account(mut, seeds = [b"reward_pool"], bump = reward_pool.pool_bump)]
     pub reward_pool: Account<'info, RewardPool>,
 
-    #[account(mut)]
+    #[account(mut, constraint = user_token_account.mint == reward_pool.reward_mint)]
     pub user_token_account: Account<'info, TokenAccount>,
 
     #[account(mut, seeds = [b"stake_vault"], bump = reward_pool.stake_vault_bump)]
@@ -445,7 +459,7 @@ pub struct ClaimRewards<'info> {
     #[account(mut, seeds = [b"stake_vault"], bump = reward_pool.stake_vault_bump)]
     pub stake_vault: Account<'info, TokenAccount>,
 
-    #[account(mut)]
+    #[account(mut, constraint = user_token_account.mint == reward_pool.reward_mint)]
     pub user_token_account: Account<'info, TokenAccount>,
 
     pub token_program: Program<'info, Token>,
