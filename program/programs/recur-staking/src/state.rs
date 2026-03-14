@@ -63,9 +63,9 @@ impl StakeAccount {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
 pub enum NodeTier {
-    Nano,   // >= 1,000  $RECUR
-    Ward,   // >= 10,000 $RECUR
-    Prime,  // >= 50,000 $RECUR
+    Nano,   // >=    10,000 $RECUR
+    Ward,   // >=   100,000 $RECUR
+    Prime,  // >= 1,000,000 $RECUR
 }
 
 impl NodeTier {
