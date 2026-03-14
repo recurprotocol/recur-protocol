@@ -137,3 +137,10 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Solana / Anchor
+program/target/
+test-ledger/
+.anchor/
+*.so
+*-keypair.json
