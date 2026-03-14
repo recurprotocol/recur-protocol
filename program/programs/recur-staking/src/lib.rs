@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Token, TokenAccount, Transfer};
+use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
-declare_id!("RECURXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx"); // replace after first deploy
+declare_id!("B9yz27EvNVFyh8LwqCqviRX3R24YM3UmC2X2dff6kTKj");
 
 pub mod constants;
 pub mod errors;
@@ -44,7 +44,7 @@ pub mod recur_staking {
 
     /// Stake $RECUR tokens, choosing a lock duration
     pub fn stake(
-        ctx: Context<Stake>,
+        ctx: Context<StakeCtx>,
         amount: u64,
         lock: LockDuration,
         auto_compound: bool,
@@ -338,7 +338,7 @@ fn calculate_rewards(
     let reward = (stake_account.amount as u128)
         .checked_mul(apy_bps).ok_or(RecurError::Overflow)?
         .checked_mul(multiplier).ok_or(RecurError::Overflow)?
-        .checked_mul(elapsed_weeks).ok_or(RecurError::Overflow)?
+        .checked_mul(elapsed_weeks as u128).ok_or(RecurError::Overflow)?
         .checked_div(52 * 10_000 * 10_000).ok_or(RecurError::Overflow)? as u64;
 
     Ok(reward)
@@ -357,7 +357,7 @@ pub struct InitialisePool<'info> {
     )]
     pub reward_pool: Account<'info, RewardPool>,
 
-    pub reward_mint: Account<'info, token::Mint>,
+    pub reward_mint: Account<'info, Mint>,
 
     #[account(
         init, payer = authority,
@@ -381,7 +381,7 @@ pub struct InitialisePool<'info> {
 }
 
 #[derive(Accounts)]
-pub struct Stake<'info> {
+pub struct StakeCtx<'info> {
     #[account(mut)]
     pub staker: Signer<'info>,
 

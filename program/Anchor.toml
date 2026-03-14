@@ -3,10 +3,10 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-recur_staking = "RECURXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx"
+recur_staking = "B9yz27EvNVFyh8LwqCqviRX3R24YM3UmC2X2dff6kTKj"
 
 [programs.devnet]
-recur_staking = "RECURXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx"
+recur_staking = "B9yz27EvNVFyh8LwqCqviRX3R24YM3UmC2X2dff6kTKj"
 
 [registry]
 url = "https://api.apr.dev"
