@@ -522,6 +522,16 @@ function Staking({setPage}) {
         </Panel>
       </section>
 
+      {/* Token CA */}
+      <section style={{padding:"0 64px 40px",maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
+        <div style={{fontSize:9,letterSpacing:3,color:"var(--text-d)",marginBottom:6}}>TOKEN CONTRACT ADDRESS</div>
+        <div style={{fontFamily:"'Fira Code',monospace",fontSize:11,color:"var(--green)",letterSpacing:1,
+          padding:"10px 20px",background:"rgba(0,255,65,0.03)",border:"1px solid var(--border)",
+          display:"inline-block",userSelect:"all"}}>
+          7isDRjp7u64MtpxbkgFyYpHfCPojMQhSa6VcPrRZpump
+        </div>
+      </section>
+
       {/* Footer */}
       <footer style={{borderTop:"1px solid var(--border-b)",padding:"24px 64px",
         display:"flex",justifyContent:"space-between",alignItems:"center"}}>
