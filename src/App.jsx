@@ -542,7 +542,7 @@ function Staking({setPage}) {
           RECUR PROTOCOL
         </div>
         <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>BUILT FOR SOLANA · {new Date().getFullYear()}</div>
-        <a href="https://github.com/luxioxau/recur-protocol" target="_blank" rel="noreferrer"
+        <a href="https://github.com/recurprotocol/recur-protocol" target="_blank" rel="noreferrer"
           style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,textDecoration:"none",transition:"color 0.2s"}}
           onMouseEnter={e=>e.target.style.color="#ffffff"}
           onMouseLeave={e=>e.target.style.color="var(--text-d)"}>GITHUB ↗</a>
@@ -612,7 +612,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
             onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.1)";e.target.style.boxShadow="none"}}>
             VIEW LIVE DASHBOARD
           </button>
-          <a href="https://github.com/luxioxau/recur-protocol" target="_blank" rel="noreferrer" style={{
+          <a href="https://github.com/recurprotocol/recur-protocol" target="_blank" rel="noreferrer" style={{
             fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:4,padding:"14px 44px",
             background:"transparent",color:"var(--text-d)",border:"1px solid var(--border)",
             textDecoration:"none",display:"flex",alignItems:"center",transition:"color 0.2s"}}
@@ -758,7 +758,7 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
           RECUR PROTOCOL
         </div>
         <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>BUILT FOR SOLANA · {new Date().getFullYear()}</div>
-        <a href="https://github.com/luxioxau/recur-protocol" target="_blank" rel="noreferrer"
+        <a href="https://github.com/recurprotocol/recur-protocol" target="_blank" rel="noreferrer"
           style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,textDecoration:"none",transition:"color 0.2s"}}
           onMouseEnter={e=>e.target.style.color="#ffffff"}
           onMouseLeave={e=>e.target.style.color="var(--text-d)"}>GITHUB ↗</a>
