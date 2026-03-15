@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const API_BASE = "/api";
 const RECUR_API_KEY = import.meta.env.VITE_RECUR_API_KEY || "";
@@ -75,22 +75,6 @@ const VULN_CATEGORIES = [
   {name:"Context Leakage Prevention",  score:88,checks:22,passed:20,critical:0},
   {name:"Model Inversion Defence",     score:71,checks:18,passed:13,critical:3},
 ];
-
-const genFakeThreat = (id) => {
-  const types = ["INJECTION","EXTRACTION","JAILBREAK","INVERSION","POISONING","ADVERSARIAL"];
-  const type = types[Math.floor(Math.random()*types.length)];
-  const sev = Math.random();
-  const sources = ["Anon-0x4f2a","Bot-Cluster-19","APT-NullByte","Fuzz-Harness","Zero-0xdeadbeef","AutoPT-v3","RedTeam-7"];
-  return {
-    id, type,
-    source: sources[Math.floor(Math.random()*sources.length)],
-    severity: sev>0.75?"CRITICAL":sev>0.4?"HIGH":"MEDIUM",
-    target: IP_ASSETS[Math.floor(Math.random()*IP_ASSETS.length)].name,
-    blocked: Math.random()>0.08,
-    ts: new Date().toISOString().slice(11,23),
-    isReal: false,
-  };
-};
 
 const backendEventToThreat = (evt) => ({
   id: evt.event_id||evt.id||Math.random().toString(36).slice(2),
@@ -773,6 +757,13 @@ function ThreatFeedPanel({threats}) {
     <Panel style={{display:"flex",flexDirection:"column",height:"100%"}}>
       <PanelHeader title="THREAT FEED" sub="LIVE ATTACK INTERCEPT STREAM" right={`${threats.length} EVENTS`} accent="#ff0033"/>
       <div style={{flex:1,overflow:"auto",padding:"4px 0"}}>
+        {threats.length===0&&(
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100%",
+            flexDirection:"column",gap:8,opacity:0.5}}>
+            <div style={{fontFamily:"'VT323',monospace",fontSize:16,color:"var(--green)",letterSpacing:3}}>NO THREATS DETECTED</div>
+            <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>SENTINEL NETWORK MONITORING</div>
+          </div>
+        )}
         {threats.map((t)=>{
           const def=ATTACK_TYPES[t.type]||ATTACK_TYPES["INJECTION"];
           const sevColor=t.severity==="CRITICAL"?"#ff0033":t.severity==="HIGH"?"#ff6b00":"#ffc300";
@@ -910,6 +901,13 @@ function BlockchainLogPanel({attestations}) {
     <Panel style={{height:"100%",display:"flex",flexDirection:"column"}}>
       <PanelHeader title="ON-CHAIN ATTESTATION LOG" sub="SOLANA — IMMUTABLE SECURITY PROOFS" accent="#00b4d8"/>
       <div style={{flex:1,overflow:"auto",padding:"4px 0"}}>
+        {attestations.length===0&&(
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100%",
+            flexDirection:"column",gap:8,opacity:0.5}}>
+            <div style={{fontFamily:"'VT323',monospace",fontSize:16,color:"#00b4d8",letterSpacing:3}}>AWAITING ON-CHAIN EVENTS</div>
+            <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>SOLANA ATTESTATION LOG IDLE</div>
+          </div>
+        )}
         {attestations.map((a,i)=>(
           <div key={i} style={{padding:"5px 12px",borderBottom:"1px solid var(--border-b)",
             display:"grid",gridTemplateColumns:"110px 1fr 100px",gap:8,alignItems:"center",animation:"data-in 0.3s ease"}}>
@@ -924,26 +922,9 @@ function BlockchainLogPanel({attestations}) {
 }
 
 /* ── DASHBOARD ── */
-function Dashboard({threats,setThreats,attestations,setAttestations,stats,generation,mutations,setMutations,alertActive,setAlertActive,apiOnline,fakeIdRef}) {
+function Dashboard({threats,setThreats,attestations,setAttestations,stats,generation,mutations,setMutations,alertActive,setAlertActive,apiOnline}) {
   const [activeTab,setActiveTab] = useState("overview");
   const tabs = ["overview","sentinels","vulnerabilities","ip vault","blockchain"];
-
-  useEffect(()=>{
-    const iv = setInterval(()=>{
-      if(apiOnline) return;
-      const threat = genFakeThreat(fakeIdRef.current++);
-      setThreats(prev=>[threat,...prev].slice(0,40));
-      if(!threat.blocked) setAlertActive(true);
-      if(Math.random()>0.6) setMutations(m=>m+Math.floor(Math.random()*4)+1);
-      const evts=["SENTINEL MUTATION APPLIED","CANARY TOKEN ROTATED","ZK PROOF COMMITTED","AGENT SPAWNED","ATTACK VECTOR PATCHED","THREAT SIGNATURE UPDATED"];
-      setAttestations(prev=>[{
-        block:`#SOL-${(9124481+prev.length).toLocaleString().replace(/,/g,"")}`,
-        hash:`0x${Math.random().toString(16).slice(2,6)}...${Math.random().toString(16).slice(2,6)}`,
-        event:evts[Math.floor(Math.random()*evts.length)],
-      },...prev].slice(0,20));
-    },1400);
-    return()=>clearInterval(iv);
-  },[apiOnline]);
 
   const metrics = [
     {label:"SENTINEL GEN",    value:generation,                                       color:"#ffffff"},
@@ -1088,20 +1069,13 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
 export default function App() {
   const [page,         setPage]         = useState("landing");
   const [threats,      setThreats]      = useState([]);
-  const [attestations, setAttestations] = useState([
-    {block:"#SOL-9124481",hash:"0xf3a2...d91b",event:"SENTINEL GEN-7 SPAWNED"},
-    {block:"#SOL-9124479",hash:"0xb811...c43a",event:"MUTATION CHECKPOINT SEALED"},
-    {block:"#SOL-9124472",hash:"0x9d04...f7e2",event:"BREACH ATTEMPT — BLOCKED & LOGGED"},
-    {block:"#SOL-9124460",hash:"0x2af1...8b3c",event:"IP ASSET INTEGRITY VERIFIED"},
-    {block:"#SOL-9124451",hash:"0xe77d...1209",event:"VULN PATCH 0x7c DEPLOYED"},
-    {block:"#SOL-9124440",hash:"0x5c3b...a021",event:"ZERO-KNOWLEDGE PROOF SUBMITTED"},
-  ]);
+  const [attestations, setAttestations] = useState([]);
   const [stats,        setStats]        = useState(null);
   const [generation,   setGeneration]   = useState(7);
   const [mutations,    setMutations]    = useState(1284);
   const [alertActive,  setAlertActive]  = useState(false);
   const [apiOnline,    setApiOnline]    = useState(false);
-  const fakeIdRef = useRef(1000);
+
 
   useEffect(()=>{
     const poll = async()=>{
@@ -1160,7 +1134,7 @@ export default function App() {
           stats={stats}               generation={generation}
           mutations={mutations}       setMutations={setMutations}
           alertActive={alertActive}   setAlertActive={setAlertActive}
-          apiOnline={apiOnline}       fakeIdRef={fakeIdRef}
+          apiOnline={apiOnline}
         />
       )}
     </>
