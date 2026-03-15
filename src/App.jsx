@@ -245,9 +245,12 @@ function Nav({page, setPage, apiOnline}) {
           boxShadow:apiOnline?"0 0 10px #00ff41":"0 0 10px #ffc300",
           animation:"pulse-green 2s infinite",
         }}/>
-        <span style={{color:apiOnline?"#ffffff":"#ffc300",letterSpacing:1}}>
-          {apiOnline?"SENTINEL NETWORK ONLINE":"SENTINEL DEMO MODE"}
-        </span>
+        <div>
+          <span style={{color:apiOnline?"#ffffff":"#ffc300",letterSpacing:1}}>
+            {apiOnline?"SENTINEL NETWORK ONLINE":"SENTINEL OFFLINE"}
+          </span>
+          {apiOnline&&<div style={{fontSize:8,color:"var(--text-d)",letterSpacing:1,marginTop:1}}>PROXY ACCEPTING REQUESTS</div>}
+        </div>
       </div>
 
       {page==="landing" && (
@@ -553,7 +556,7 @@ fetch("https://api.openai.com/v1/chat/completions", {
 });
 
 // After — protected by RECUR
-fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
+fetch("https://recur-protocol.vercel.app/api/proxy", {
   headers: {
     "x-recur-provider":    "openai",
     "x-recur-api-key":     RECUR_KEY,
@@ -604,6 +607,13 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
             onMouseLeave={e=>e.currentTarget.style.color="var(--text-d)"}>
             GITHUB ↗
           </a>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:24,
+          animation:"fade-up 0.7s ease 0.5s both",opacity:0}}>
+          <div style={{width:7,height:7,borderRadius:"50%",background:"#00ff41",
+            boxShadow:"0 0 10px #00ff41",animation:"pulse-green 2s infinite"}}/>
+          <span style={{fontSize:10,color:"var(--green)",letterSpacing:2}}>PROXY LIVE</span>
+          <span style={{fontSize:10,color:"var(--text-d)",letterSpacing:1}}>— INTEGRATE IN 2 MINUTES</span>
         </div>
         <div style={{position:"absolute",bottom:28,fontSize:9,color:"var(--text-d)",
           letterSpacing:4,animation:"fade-up 1s ease 1.4s both",opacity:0}}>SCROLL ↓</div>
@@ -678,6 +688,10 @@ fetch("https://recur-protocol-v2.vercel.app/api/proxy", {
           </div>
           <pre style={{padding:"28px 32px",fontFamily:"'Fira Code',monospace",fontSize:11,
             color:"var(--text)",lineHeight:1.9,overflowX:"auto",background:"transparent"}}>{code}</pre>
+          <div style={{padding:"12px 32px 16px",borderTop:"1px solid var(--border-b)",
+            fontSize:10,color:"var(--text-d)",letterSpacing:1,lineHeight:1.8}}>
+            No wallet required. No token required. Drop-in replacement for your existing OpenAI or Anthropic endpoint.
+          </div>
         </Panel>
       </section>
 

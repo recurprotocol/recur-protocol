@@ -1,6 +1,28 @@
-# RECUR Protocol — Backend v1
+# RECUR Protocol
 
-Recursive AI security sentinel backend. Intercepts prompts destined for OpenAI and Anthropic, runs threat detection, blocks attacks, and logs every event.
+Self-evolving AI security sentinels. Intercepts prompts destined for OpenAI and Anthropic, detects and blocks adversarial attacks, and logs every event.
+
+---
+
+## Two Layers
+
+### Layer 1 — Proxy (Live)
+
+Drop-in AI security proxy. No wallet, no token required. Replace your OpenAI or Anthropic endpoint and you're protected.
+
+- **Production endpoint:** `https://recur-protocol.vercel.app/api/proxy`
+- Works with OpenAI and Anthropic today
+- 5 attack categories, 40+ detection signatures, <5ms latency overhead
+- No SDK, no code changes to your application logic
+
+### Layer 2 — Staking (Coming Soon)
+
+Stake $RECUR to run sentinel nodes, earn weekly rewards, and commit security proofs on-chain to Solana.
+
+- Program deployed to devnet: `B9yz27EvNVFyh8LwqCqviRX3R24YM3UmC2X2dff6kTKj`
+- 3 node tiers: Nano (10K), Ward (100K), Prime (1M $RECUR)
+- 4 lock durations: Flexible (8%), 3mo (12%), 6mo (16%), 12mo (20%) APY
+- Auto-compounding, slashing, uptime tracking
 
 ---
 
@@ -11,7 +33,7 @@ Client
   ↓
 POST /api/proxy          ← Node.js — receives & routes requests
   ↓
-POST /api/detect         ← Python — injection/jailbreak/extraction detection
+POST /api/detect         ← Detection engine — injection/jailbreak/extraction analysis
   ↓ (blocked or clean)
 OpenAI / Anthropic       ← clean requests forwarded to provider
   ↓
@@ -27,7 +49,7 @@ Response to client       ← provider response + RECUR metadata attached
 | Endpoint | Method | Description |
 |---|---|---|
 | `/api/proxy` | POST | Main entry point — wraps OpenAI/Anthropic |
-| `/api/detect` | POST | Python detection engine — threat analysis |
+| `/api/detect` | POST | Detection engine — threat analysis |
 | `/api/threats` | GET | Retrieve threat event log + stats |
 | `/api/threats` | POST | Log a threat event (called internally by proxy) |
 | `/api/health` | GET | Service health check |
@@ -36,7 +58,7 @@ Response to client       ← provider response + RECUR metadata attached
 
 ## Using the Proxy
 
-Replace your OpenAI or Anthropic API call with a call to RECUR's proxy:
+Replace your OpenAI or Anthropic API call with a call to RECUR's proxy. No wallet required. No token required.
 
 ### OpenAI Example
 
@@ -52,7 +74,7 @@ const response = await fetch("https://api.openai.com/v1/chat/completions", {
 });
 
 // After — through RECUR
-const response = await fetch("https://your-recur-backend.vercel.app/api/proxy", {
+const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -67,7 +89,7 @@ const response = await fetch("https://your-recur-backend.vercel.app/api/proxy", 
 ### Anthropic Example
 
 ```javascript
-const response = await fetch("https://your-recur-backend.vercel.app/api/proxy", {
+const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -127,7 +149,7 @@ Blocked requests return immediately without hitting the provider:
 
 ---
 
-## Detection Capabilities v1
+## Detection Capabilities
 
 | Attack Type | Description |
 |---|---|
@@ -146,7 +168,7 @@ Set these in Vercel dashboard or `.env.local` for local dev:
 
 ```
 RECUR_API_SECRET=your-secret-key-here
-DETECTION_URL=https://your-recur-backend.vercel.app/api/detect
+DETECTION_URL=https://recur-protocol.vercel.app/api/detect
 ```
 
 ---
@@ -164,11 +186,12 @@ Set `RECUR_API_SECRET` in Vercel environment variables before deploying.
 
 ## Roadmap
 
+- [x] Live proxy with OpenAI and Anthropic support
+- [x] Real-time threat dashboard
+- [x] Solana staking program (devnet)
 - [ ] Vercel KV / Upstash Redis for persistent event storage
 - [ ] Solana on-chain attestation of threat events
 - [ ] Sentinel mutation — detection models update from observed attacks
 - [ ] Canary token injection and monitoring
 - [ ] Rate limiting and abuse detection
-- [ ] Dashboard integration with frontend
-
- 
+- [ ] Mainnet staking launch
