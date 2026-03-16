@@ -18,17 +18,22 @@ export default async function handler(req, res) {
 
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-recur-api-key, x-recur-internal");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-recur-api-key, x-recur-internal-secret");
 
   if (req.method === "OPTIONS") return res.status(200).end();
 
   // ── POST: receive and store event ──
   if (req.method === "POST") {
-    const isInternal = req.headers["x-recur-internal"] === "true";
-    const apiKey     = req.headers["x-recur-api-key"];
-    const secret     = process.env.RECUR_API_SECRET;
+    const internalSecret = req.headers["x-recur-internal-secret"];
+    const expectedSecret = process.env.RECUR_API_SECRET;
+    const apiKey         = req.headers["x-recur-api-key"];
 
-    if (!isInternal && secret && apiKey !== secret) {
+    // Accept if: internal secret matches, OR external API key matches
+    const isAuthed = (expectedSecret && internalSecret === expectedSecret)
+                  || (expectedSecret && apiKey === expectedSecret)
+                  || !expectedSecret; // open mode if no secret configured
+
+    if (!isAuthed) {
       return res.status(401).json({ error: "Unauthorised" });
     }
 

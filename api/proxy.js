@@ -360,12 +360,14 @@ async function logEvent(event, req) {
   const host = req.headers.host || "localhost:3000";
   const protocol = host.includes("localhost") ? "http" : "https";
 
+  const headers = { "Content-Type": "application/json" };
+  if (RECUR_API_SECRET) {
+    headers["x-recur-internal-secret"] = RECUR_API_SECRET;
+  }
+
   await fetch(`${protocol}://${host}/api/threats`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-recur-internal": "true",
-    },
+    headers,
     body: JSON.stringify(event),
   });
 }
