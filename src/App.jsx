@@ -1102,8 +1102,98 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
   );
 }
 
+/* ── USE CASES ── */
+function UseCases({setPage}) {
+  const cases = [
+    {
+      icon: "01", title: "AI-Powered SaaS Products",
+      desc: "If your product wraps GPT-4, Claude, or any LLM, your users can inject prompts that bypass your system instructions, leak proprietary logic, or manipulate outputs. RECUR sits between your app and the provider — every prompt is scanned before it reaches the model.",
+      example: "Customer support bots, AI writing tools, code assistants, search engines with LLM summaries",
+    },
+    {
+      icon: "02", title: "Internal Enterprise Tools",
+      desc: "Employees and contractors use internal AI tools daily. A single prompt injection can extract confidential system prompts, training data references, or bypass content policies. RECUR protects internal deployments without requiring changes to your existing stack.",
+      example: "Internal knowledge bases, HR chatbots, document analysis tools, compliance assistants",
+    },
+    {
+      icon: "03", title: "AI Agents & Autonomous Systems",
+      desc: "Agents that take actions (send emails, write code, query databases) are high-value targets. An adversarial prompt can hijack the agent's tool-calling chain. RECUR intercepts before the agent acts, blocking instruction overrides and role escalation.",
+      example: "Coding agents, email assistants, data pipeline agents, customer-facing autonomous workflows",
+    },
+    {
+      icon: "04", title: "API Providers & Platforms",
+      desc: "If you resell or aggregate LLM access, your users' prompts pass through your infrastructure. You're liable for misuse and attacks that transit your platform. RECUR gives you a security layer without building detection in-house.",
+      example: "API gateways, LLM routers, AI marketplaces, multi-tenant platforms",
+    },
+    {
+      icon: "05", title: "Regulated Industries",
+      desc: "Healthcare, finance, legal, and government AI deployments face strict compliance requirements. RECUR provides an auditable security layer with full event logging — every prompt scanned, every threat recorded, every decision traceable.",
+      example: "Medical AI assistants, financial advisors, legal document review, government citizen services",
+    },
+    {
+      icon: "06", title: "Red Teams & Security Research",
+      desc: "Testing your own AI systems against adversarial attacks? Route your red team traffic through RECUR to benchmark detection rates, identify blind spots, and validate that your defences hold under real attack patterns.",
+      example: "Penetration testing, AI security audits, adversarial robustness evaluation, CTF challenges",
+    },
+  ];
+
+  return (
+    <div style={{position:"relative",zIndex:1,minHeight:"100vh",paddingTop:54}}>
+      <section style={{padding:"60px 64px 40px",maxWidth:1100,margin:"0 auto"}}>
+        <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10,
+          border:"1px solid var(--border)",display:"inline-block",padding:"4px 14px"}}>
+          USE CASES
+        </div>
+        <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:48,letterSpacing:6,
+          color:"#ffffff",marginBottom:10,lineHeight:1}}>
+          WHO NEEDS RECUR
+        </h1>
+        <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.8,marginBottom:48,maxWidth:600}}>
+          Any application that sends user-controlled text to an LLM is a target. If prompts reach your model unscanned, you're exposed.
+        </p>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+          {cases.map((c,i) => (
+            <Panel key={i} style={{padding:"30px 28px"}}>
+              <div style={{display:"flex",alignItems:"flex-start",gap:16}}>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:48,color:"rgba(0,255,65,0.1)",
+                  lineHeight:1,letterSpacing:4,flexShrink:0}}>{c.icon}</div>
+                <div>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,letterSpacing:3,
+                    color:"#ffffff",marginBottom:10}}>{c.title}</div>
+                  <div style={{fontSize:10,color:"var(--text-d)",lineHeight:1.85,marginBottom:12}}>{c.desc}</div>
+                  <div style={{fontSize:9,color:"var(--green)",letterSpacing:1,opacity:0.7}}>{c.example}</div>
+                </div>
+              </div>
+            </Panel>
+          ))}
+        </div>
+
+        <div style={{marginTop:48,display:"flex",gap:14,justifyContent:"center"}}>
+          <button onClick={()=>setPage("get-access")} style={{
+            fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:4,
+            padding:"14px 44px",background:"rgba(0,255,65,0.1)",color:"#ffffff",
+            border:"1px solid rgba(0,255,65,0.45)",cursor:"pointer",transition:"all 0.25s"}}
+            onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 40px rgba(0,255,65,0.2)"}}
+            onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.1)";e.target.style.boxShadow="none"}}>
+            GET YOUR API KEY →
+          </button>
+          <button onClick={()=>setPage("landing")} style={{
+            fontFamily:"'Fira Code',monospace",fontSize:10,letterSpacing:2,
+            padding:"14px 28px",background:"transparent",color:"var(--text-d)",
+            border:"1px solid var(--border)",cursor:"pointer",transition:"all 0.2s"}}
+            onMouseEnter={e=>{e.target.style.color="#ffffff";e.target.style.borderColor="rgba(0,255,65,0.4)"}}
+            onMouseLeave={e=>{e.target.style.color="var(--text-d)";e.target.style.borderColor="var(--border)"}}>
+            BACK TO HOME
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 /* ── GET ACCESS ── */
-function GetAccess() {
+function GetAccess({setPage}) {
   const [email, setEmail]           = useState("");
   const [useCase, setUseCase]       = useState("");
   const [loading, setLoading]       = useState(false);
@@ -1208,8 +1298,16 @@ function GetAccess() {
               </button>
             </form>
 
-            <div style={{marginTop:28,fontSize:9,color:"var(--text-d)",letterSpacing:1,lineHeight:1.8,textAlign:"center"}}>
-              No wallet required. No token required. Free while in beta.
+            <div style={{marginTop:28,textAlign:"center"}}>
+              <button onClick={()=>setPage("use-cases")} style={{
+                fontFamily:"'Fira Code',monospace",fontSize:9,letterSpacing:2,
+                padding:"7px 18px",background:"transparent",color:"var(--text-d)",
+                border:"1px solid var(--border)",cursor:"pointer",transition:"all 0.2s",
+              }}
+              onMouseEnter={e=>{e.target.style.color="#ffffff";e.target.style.borderColor="rgba(0,255,65,0.4)"}}
+              onMouseLeave={e=>{e.target.style.color="var(--text-d)";e.target.style.borderColor="var(--border)"}}>
+                VIEW USE CASES →
+              </button>
             </div>
           </>
         ) : (
@@ -1334,7 +1432,8 @@ export default function App() {
 
       {page==="landing"    && <Landing setPage={setPage}/>}
       {page==="staking"    && <Staking setPage={setPage}/>}
-      {page==="get-access" && <GetAccess/>}
+      {page==="get-access" && <GetAccess setPage={setPage}/>}
+      {page==="use-cases"  && <UseCases setPage={setPage}/>}
       {page==="dashboard" && (
         <Dashboard
           threats={threats}           setThreats={setThreats}
