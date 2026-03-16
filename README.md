@@ -194,6 +194,48 @@ Blocked requests return immediately without hitting the provider:
 
 ---
 
+## Switching Providers
+
+The provider is specified per-request via `x-recur-provider`. Your RECUR integration never changes — only the header value does.
+
+```javascript
+const headers = {
+  "Content-Type": "application/json",
+  "x-recur-api-key": RECUR_KEY,         // always the same
+};
+
+// OpenAI
+await fetch("https://recur-protocol.vercel.app/api/proxy", {
+  method: "POST",
+  headers: { ...headers, "x-recur-provider": "openai", "x-recur-target-key": OPENAI_KEY },
+  body: JSON.stringify({ model: "gpt-4o-mini", messages })
+});
+
+// Anthropic
+await fetch("https://recur-protocol.vercel.app/api/proxy", {
+  method: "POST",
+  headers: { ...headers, "x-recur-provider": "anthropic", "x-recur-target-key": ANTHROPIC_KEY },
+  body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1024, messages })
+});
+
+// Gemini
+await fetch("https://recur-protocol.vercel.app/api/proxy", {
+  method: "POST",
+  headers: { ...headers, "x-recur-provider": "gemini", "x-recur-target-key": GEMINI_KEY },
+  body: JSON.stringify({ model: "gemini-1.5-flash", messages })
+});
+```
+
+What stays constant when you switch providers:
+
+- Your `x-recur-api-key` — one key for all providers
+- Your security coverage — same detection engine, same 40+ signatures
+- Your threat audit log — every request logged regardless of provider
+
+Supported values for `x-recur-provider`: `openai`, `anthropic`, `groq`, `openrouter`, `mistral`, `gemini`
+
+---
+
 ## Detection Capabilities
 
 | Attack Type | Description |

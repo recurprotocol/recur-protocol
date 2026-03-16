@@ -166,6 +166,15 @@ function Nav({page, setPage, apiOnline}) {
           transition:"all 0.2s",
         }}>HOME</button>
 
+        <button onClick={()=>setPage("docs")} style={{
+          fontFamily:"'Fira Code',monospace",fontSize:10,padding:"5px 14px",
+          cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
+          background:"transparent",
+          color:page==="docs"?"#ffffff":"var(--text-d)",
+          borderBottom:page==="docs"?"2px solid rgba(0,255,65,0.6)":"2px solid transparent",
+          transition:"all 0.2s",
+        }}>DOCS</button>
+
         <div style={{position:"relative"}}
           onMouseEnter={()=>setDropOpen(true)}
           onMouseLeave={()=>setDropOpen(false)}>
@@ -1102,6 +1111,224 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
   );
 }
 
+/* ── DOCS ── */
+function Docs({setPage}) {
+  const Section = ({id,title,children}) => (
+    <section id={id} style={{marginBottom:56}}>
+      <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:32,letterSpacing:5,color:"#ffffff",marginBottom:20}}>{title}</h2>
+      {children}
+    </section>
+  );
+
+  const Code = ({children}) => (
+    <Panel style={{overflow:"hidden",marginBottom:16}}>
+      <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border-b)",
+        display:"flex",gap:8,alignItems:"center",background:"rgba(0,255,65,0.03)"}}>
+        {["#ff0033","#ffc300","#00ff41"].map((c,i)=>(<div key={i} style={{width:8,height:8,borderRadius:"50%",background:c}}/>))}
+      </div>
+      <pre style={{padding:"20px 24px",fontFamily:"'Fira Code',monospace",fontSize:10,
+        color:"var(--text)",lineHeight:1.9,overflowX:"auto",background:"transparent",whiteSpace:"pre-wrap"}}>{children}</pre>
+    </Panel>
+  );
+
+  const Table = ({headers,rows}) => (
+    <div style={{overflowX:"auto",marginBottom:16}}>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,fontFamily:"'Fira Code',monospace"}}>
+        <thead>
+          <tr>{headers.map((h,i)=>(
+            <th key={i} style={{textAlign:"left",padding:"10px 14px",borderBottom:"1px solid var(--border)",
+              color:"var(--green)",letterSpacing:2,fontSize:9,fontWeight:400}}>{h}</th>
+          ))}</tr>
+        </thead>
+        <tbody>{rows.map((row,i)=>(
+          <tr key={i}>{row.map((cell,j)=>(
+            <td key={j} style={{padding:"9px 14px",borderBottom:"1px solid var(--border-b)",
+              color:j===0?"#ffffff":"var(--text-d)"}}>{cell}</td>
+          ))}</tr>
+        ))}</tbody>
+      </table>
+    </div>
+  );
+
+  const toc = [
+    {id:"quick-start",label:"Quick Start"},
+    {id:"provider-switching",label:"Provider Switching"},
+    {id:"request-headers",label:"Request Headers"},
+    {id:"supported-providers",label:"Supported Providers"},
+    {id:"error-codes",label:"Error Codes"},
+  ];
+
+  return (
+    <div style={{position:"relative",zIndex:1,minHeight:"100vh",paddingTop:54}}>
+      <div style={{display:"grid",gridTemplateColumns:"200px 1fr",maxWidth:1100,margin:"0 auto",padding:"48px 64px",gap:48}}>
+
+        {/* Sidebar */}
+        <nav style={{position:"sticky",top:110,alignSelf:"start"}}>
+          <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:16}}>CONTENTS</div>
+          {toc.map(t=>(
+            <a key={t.id} href={`#${t.id}`} style={{display:"block",fontSize:10,color:"var(--text-d)",
+              letterSpacing:1,padding:"6px 0",textDecoration:"none",transition:"color 0.15s",
+              borderLeft:"2px solid var(--border)",paddingLeft:12,marginBottom:2}}
+              onMouseEnter={e=>e.target.style.color="#ffffff"}
+              onMouseLeave={e=>e.target.style.color="var(--text-d)"}>{t.label}</a>
+          ))}
+          <div style={{borderTop:"1px solid var(--border)",marginTop:16,paddingTop:16}}>
+            <button onClick={()=>setPage("get-access")} style={{
+              fontFamily:"'Fira Code',monospace",fontSize:9,letterSpacing:2,width:"100%",
+              padding:"8px 12px",background:"rgba(0,255,65,0.08)",color:"var(--green)",
+              border:"1px solid rgba(0,255,65,0.3)",cursor:"pointer",transition:"all 0.2s",textAlign:"left"}}
+              onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.15)"}}
+              onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.08)"}}>
+              GET API KEY →
+            </button>
+          </div>
+        </nav>
+
+        {/* Content */}
+        <div>
+          <div style={{fontSize:9,letterSpacing:6,color:"var(--text-d)",marginBottom:10,
+            border:"1px solid var(--border)",display:"inline-block",padding:"4px 14px"}}>
+            DOCUMENTATION
+          </div>
+          <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:48,letterSpacing:6,
+            color:"#ffffff",marginBottom:10,lineHeight:1}}>
+            RECUR PROXY DOCS
+          </h1>
+          <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.8,marginBottom:48}}>
+            Everything you need to integrate RECUR into your AI application.
+          </p>
+
+          {/* ── Quick Start ── */}
+          <Section id="quick-start" title="QUICK START">
+            <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.85,marginBottom:16}}>
+              <strong style={{color:"#ffffff"}}>1.</strong> Get an API key from the{" "}
+              <span onClick={()=>setPage("get-access")} style={{color:"var(--green)",cursor:"pointer",borderBottom:"1px solid rgba(0,255,65,0.3)"}}>
+                access page
+              </span>.
+            </p>
+            <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.85,marginBottom:16}}>
+              <strong style={{color:"#ffffff"}}>2.</strong> Replace your provider endpoint with the RECUR proxy:
+            </p>
+            <Code>{`fetch("https://recur-protocol.vercel.app/api/proxy", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "x-recur-api-key":    "recur_live_your_key_here",
+    "x-recur-provider":   "openai",
+    "x-recur-target-key": "sk-your-openai-key",
+  },
+  body: JSON.stringify({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello" }]
+  })
+});`}</Code>
+            <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.85,marginBottom:0}}>
+              <strong style={{color:"#ffffff"}}>3.</strong> Every request is now scanned for prompt injection, jailbreaks, and extraction attacks before reaching your provider. Threats are blocked automatically. Clean requests are forwarded with zero changes to the response format.
+            </p>
+          </Section>
+
+          {/* ── Provider Switching ── */}
+          <Section id="provider-switching" title="PROVIDER SWITCHING">
+            <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.85,marginBottom:20}}>
+              The provider is specified per-request via <code style={{color:"var(--green)"}}>x-recur-provider</code>. Your integration never changes — only the header value does.
+            </p>
+            <Code>{`const headers = {
+  "Content-Type": "application/json",
+  "x-recur-api-key": RECUR_KEY,  // always the same
+};
+
+// OpenAI
+await fetch(PROXY, {
+  method: "POST",
+  headers: { ...headers, "x-recur-provider": "openai", "x-recur-target-key": OPENAI_KEY },
+  body: JSON.stringify({ model: "gpt-4o-mini", messages })
+});
+
+// Anthropic
+await fetch(PROXY, {
+  method: "POST",
+  headers: { ...headers, "x-recur-provider": "anthropic", "x-recur-target-key": ANTHROPIC_KEY },
+  body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1024, messages })
+});
+
+// Gemini (auto-translated from OpenAI format)
+await fetch(PROXY, {
+  method: "POST",
+  headers: { ...headers, "x-recur-provider": "gemini", "x-recur-target-key": GEMINI_KEY },
+  body: JSON.stringify({ model: "gemini-1.5-flash", messages })
+});`}</Code>
+            <div style={{fontSize:11,color:"var(--text-d)",lineHeight:1.85}}>
+              <p style={{marginBottom:8}}>What stays constant when you switch:</p>
+              <ul style={{listStyle:"none",padding:0}}>
+                {[
+                  ["x-recur-api-key","One key for all providers"],
+                  ["Security coverage","Same detection engine, same 40+ signatures"],
+                  ["Threat audit log","Every request logged regardless of destination provider"],
+                ].map(([k,v],i)=>(
+                  <li key={i} style={{padding:"4px 0",display:"flex",gap:8}}>
+                    <span style={{color:"var(--green)",flexShrink:0}}>-</span>
+                    <span><strong style={{color:"#ffffff"}}>{k}</strong> — {v}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Section>
+
+          {/* ── Request Headers ── */}
+          <Section id="request-headers" title="REQUEST HEADERS">
+            <Table
+              headers={["HEADER","REQUIRED","DESCRIPTION"]}
+              rows={[
+                ["x-recur-api-key","Yes","Your RECUR API key (recur_live_...)"],
+                ["x-recur-provider","Yes","Target provider: openai, anthropic, groq, openrouter, mistral, gemini"],
+                ["x-recur-target-key","Yes","Your provider's API key (forwarded to the upstream provider)"],
+                ["Content-Type","Yes","Must be application/json"],
+              ]}
+            />
+            <p style={{fontSize:10,color:"var(--text-d)",lineHeight:1.8,marginTop:8}}>
+              The request body uses the provider's native format. For OpenAI-compatible providers (Groq, OpenRouter, Mistral), use the standard OpenAI messages format. For Gemini, send OpenAI-format messages — RECUR translates automatically.
+            </p>
+          </Section>
+
+          {/* ── Supported Providers ── */}
+          <Section id="supported-providers" title="SUPPORTED PROVIDERS">
+            <Table
+              headers={["PROVIDER","HEADER VALUE","FORMAT","NOTES"]}
+              rows={[
+                ["OpenAI","openai","Native","GPT-4o, GPT-4o-mini, GPT-4-turbo, GPT-3.5-turbo"],
+                ["Anthropic","anthropic","Native","Claude Opus, Sonnet, Haiku"],
+                ["Groq","groq","OpenAI-compatible","Llama 3.3 70B, Llama 3.1 8B, Mixtral"],
+                ["OpenRouter","openrouter","OpenAI-compatible","Routes to any model via OpenRouter catalog"],
+                ["Mistral","mistral","OpenAI-compatible","Mistral Large, Medium, Small, Nemo"],
+                ["Google Gemini","gemini","Auto-translated","Gemini 1.5 Flash, 1.5 Pro, 2.0 Flash"],
+              ]}
+            />
+          </Section>
+
+          {/* ── Error Codes ── */}
+          <Section id="error-codes" title="ERROR CODES">
+            <Table
+              headers={["STATUS","ERROR","CAUSE"]}
+              rows={[
+                ["401",'{"error":"x-recur-api-key header required"}',"Missing API key header"],
+                ["401",'{"error":"Invalid API key"}',"Key not found in database or malformed"],
+                ["401",'{"error":"API key has been deactivated"}',"Key exists but was disabled by admin"],
+                ["400",'{"error":"x-recur-provider header required..."}',"Missing or unsupported provider value"],
+                ["400",'{"error":"x-recur-target-key header required"}',"Missing provider API key"],
+                ["200",'{"recur":{"status":"BLOCKED",...}}',"Threat detected — request blocked before reaching provider"],
+                ["500",'{"error":"Internal sentinel error"}',"Proxy error — check message field for details"],
+              ]}
+            />
+            <p style={{fontSize:10,color:"var(--text-d)",lineHeight:1.8,marginTop:8}}>
+              Blocked requests return HTTP 200 with the provider's response format containing a <code style={{color:"var(--green)"}}>recur.status: "BLOCKED"</code> field. This ensures your client-side code handles blocks gracefully without HTTP error handling.
+            </p>
+          </Section>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── USE CASES ── */
 function UseCases({setPage}) {
   const cases = [
@@ -1434,6 +1661,7 @@ export default function App() {
       {page==="staking"    && <Staking setPage={setPage}/>}
       {page==="get-access" && <GetAccess setPage={setPage}/>}
       {page==="use-cases"  && <UseCases setPage={setPage}/>}
+      {page==="docs"       && <Docs setPage={setPage}/>}
       {page==="dashboard" && (
         <Dashboard
           threats={threats}           setThreats={setThreats}
