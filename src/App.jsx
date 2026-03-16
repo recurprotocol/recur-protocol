@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase.js";
 
 const API_BASE = "/api";
 const RECUR_API_KEY = import.meta.env.VITE_RECUR_API_KEY || "";
@@ -252,6 +253,18 @@ function Nav({page, setPage, apiOnline}) {
           {apiOnline&&<div style={{fontSize:8,color:"var(--text-d)",letterSpacing:1,marginTop:1}}>PROXY ACCEPTING REQUESTS</div>}
         </div>
       </div>
+
+      <button onClick={()=>setPage("get-access")} style={{
+        fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:3,
+        padding:"8px 20px",flexShrink:0,
+        background:page==="get-access"?"rgba(0,255,65,0.2)":"rgba(0,255,65,0.08)",
+        color:"#ffffff",
+        border:"1px solid rgba(0,255,65,0.5)",cursor:"pointer",transition:"all 0.2s",
+        boxShadow:page==="get-access"?"0 0 16px rgba(0,255,65,0.15)":"none",
+      }}
+      onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 20px rgba(0,255,65,0.15)"}}
+      onMouseLeave={e=>{if(page!=="get-access"){e.target.style.background="rgba(0,255,65,0.08)";e.target.style.boxShadow="none"}}}
+      >GET ACCESS</button>
 
       {page==="landing" && (
         <button onClick={()=>setPage("dashboard")} style={{
@@ -1089,6 +1102,176 @@ function Dashboard({threats,setThreats,attestations,setAttestations,stats,genera
   );
 }
 
+/* ── GET ACCESS ── */
+function GetAccess() {
+  const [email, setEmail]           = useState("");
+  const [useCase, setUseCase]       = useState("");
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState(null);
+  const [generatedKey, setGeneratedKey] = useState(null);
+  const [copied, setCopied]         = useState(false);
+
+  const generateKey = () => {
+    const hex = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map(b => b.toString(16).padStart(2, "0")).join("");
+    return `recur_live_${hex}`;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    if (!email.trim()) return setError("Email required.");
+    if (!useCase.trim()) return setError("Tell us what you're building.");
+    if (!supabase) return setError("Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+
+    setLoading(true);
+    const apiKey = generateKey();
+
+    const { error: dbError } = await supabase.from("api_keys").insert({
+      email: email.trim(),
+      use_case: useCase.trim(),
+      api_key: apiKey,
+      active: true,
+    });
+
+    setLoading(false);
+    if (dbError) return setError(dbError.message);
+    setGeneratedKey(apiKey);
+  };
+
+  const copyKey = () => {
+    navigator.clipboard.writeText(generatedKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const inputStyle = {
+    width: "100%", padding: "14px 16px",
+    fontFamily: "'Fira Code',monospace", fontSize: 12,
+    background: "rgba(0,255,65,0.03)", color: "#ffffff",
+    border: "1px solid var(--border)", outline: "none",
+    letterSpacing: 1, transition: "border-color 0.2s",
+  };
+
+  return (
+    <div style={{position:"relative",zIndex:1,minHeight:"100vh",paddingTop:54,
+      display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <div style={{width:"100%",maxWidth:520,padding:"60px 40px"}}>
+
+        {!generatedKey ? (
+          <>
+            <div style={{fontSize:9,letterSpacing:7,color:"var(--text-d)",border:"1px solid var(--border)",
+              padding:"5px 18px",marginBottom:28,display:"inline-block"}}>
+              RESTRICTED ACCESS
+            </div>
+            <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:48,letterSpacing:6,
+              color:"#ffffff",marginBottom:10,lineHeight:1}}>
+              GET YOUR API KEY
+            </h1>
+            <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.8,marginBottom:36}}>
+              Route your AI traffic through the RECUR sentinel network. One key, two minutes, full protection.
+            </p>
+
+            <form onSubmit={handleSubmit} style={{display:"flex",flexDirection:"column",gap:16}}>
+              <div>
+                <label style={{fontSize:9,letterSpacing:3,color:"var(--text-d)",display:"block",marginBottom:6}}>EMAIL</label>
+                <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
+                  placeholder="you@company.com" style={inputStyle}
+                  onFocus={e=>e.target.style.borderColor="rgba(0,255,65,0.4)"}
+                  onBlur={e=>e.target.style.borderColor="var(--border)"}/>
+              </div>
+              <div>
+                <label style={{fontSize:9,letterSpacing:3,color:"var(--text-d)",display:"block",marginBottom:6}}>WHAT ARE YOU BUILDING?</label>
+                <textarea value={useCase} onChange={e=>setUseCase(e.target.value)}
+                  placeholder="AI chatbot for customer support, internal tool with GPT-4, ..."
+                  rows={3} style={{...inputStyle,resize:"vertical",minHeight:80}}
+                  onFocus={e=>e.target.style.borderColor="rgba(0,255,65,0.4)"}
+                  onBlur={e=>e.target.style.borderColor="var(--border)"}/>
+              </div>
+
+              {error && (
+                <div style={{fontSize:10,color:"#ff0033",letterSpacing:1,padding:"8px 12px",
+                  background:"rgba(255,0,51,0.08)",border:"1px solid rgba(255,0,51,0.2)"}}>
+                  {error}
+                </div>
+              )}
+
+              <button type="submit" disabled={loading} style={{
+                fontFamily:"'Bebas Neue',sans-serif",fontSize:16,letterSpacing:4,
+                padding:"16px",color:"#ffffff",cursor:loading?"wait":"pointer",
+                background:loading?"rgba(0,255,65,0.05)":"rgba(0,255,65,0.1)",
+                border:"1px solid rgba(0,255,65,0.5)",transition:"all 0.2s",
+              }}
+              onMouseEnter={e=>{if(!loading){e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 30px rgba(0,255,65,0.15)"}}}
+              onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.1)";e.target.style.boxShadow="none"}}>
+                {loading ? "GENERATING..." : "GENERATE API KEY"}
+              </button>
+            </form>
+
+            <div style={{marginTop:28,fontSize:9,color:"var(--text-d)",letterSpacing:1,lineHeight:1.8,textAlign:"center"}}>
+              No wallet required. No token required. Free while in beta.
+            </div>
+          </>
+        ) : (
+          <div style={{textAlign:"center"}}>
+            <div style={{fontSize:9,letterSpacing:7,color:"var(--green)",border:"1px solid rgba(0,255,65,0.3)",
+              padding:"5px 18px",marginBottom:28,display:"inline-block",
+              background:"rgba(0,255,65,0.05)"}}>
+              ACCESS GRANTED
+            </div>
+            <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:42,letterSpacing:6,
+              color:"#ffffff",marginBottom:10,lineHeight:1}}>
+              YOUR API KEY
+            </h1>
+            <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.8,marginBottom:28}}>
+              Save this key now. It will not be shown again.
+            </p>
+
+            <Panel style={{padding:"20px",marginBottom:16,textAlign:"left"}}>
+              <div style={{fontSize:9,letterSpacing:3,color:"var(--text-d)",marginBottom:8}}>API KEY</div>
+              <div style={{fontFamily:"'Fira Code',monospace",fontSize:12,color:"var(--green)",
+                letterSpacing:0.5,wordBreak:"break-all",lineHeight:1.8,userSelect:"all"}}>
+                {generatedKey}
+              </div>
+            </Panel>
+
+            <button onClick={copyKey} style={{
+              fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:4,
+              padding:"14px 36px",color:"#ffffff",cursor:"pointer",
+              background:copied?"rgba(0,255,65,0.15)":"rgba(0,255,65,0.1)",
+              border:`1px solid ${copied?"rgba(0,255,65,0.7)":"rgba(0,255,65,0.5)"}`,
+              transition:"all 0.2s",marginBottom:28,
+            }}
+            onMouseEnter={e=>{e.target.style.background="rgba(0,255,65,0.2)";e.target.style.boxShadow="0 0 30px rgba(0,255,65,0.15)"}}
+            onMouseLeave={e=>{e.target.style.background="rgba(0,255,65,0.1)";e.target.style.boxShadow="none"}}>
+              {copied ? "COPIED" : "COPY TO CLIPBOARD"}
+            </button>
+
+            <Panel style={{padding:"20px",textAlign:"left"}}>
+              <div style={{fontSize:9,letterSpacing:3,color:"var(--text-d)",marginBottom:10}}>QUICK START</div>
+              <pre style={{fontFamily:"'Fira Code',monospace",fontSize:10,color:"var(--text)",
+                lineHeight:1.9,overflowX:"auto",whiteSpace:"pre-wrap"}}>{`fetch("https://recur-protocol.vercel.app/api/proxy", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "x-recur-api-key": "${generatedKey}",
+    "x-recur-provider": "openai",
+    "x-recur-target-key": YOUR_OPENAI_KEY,
+  },
+  body: JSON.stringify({ model: "gpt-4o-mini", messages })
+});`}</pre>
+            </Panel>
+
+            <div style={{marginTop:24,fontSize:9,color:"var(--text-d)",letterSpacing:1,lineHeight:1.8}}>
+              Pass this key in the <span style={{color:"var(--green)"}}>x-recur-api-key</span> header with every request.
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── ROOT ── */
 export default function App() {
   const [page,         setPage]         = useState("landing");
@@ -1149,8 +1332,9 @@ export default function App() {
       <BgGrid/>
       <Nav page={page} setPage={setPage} apiOnline={apiOnline}/>
 
-      {page==="landing"   && <Landing setPage={setPage}/>}
-      {page==="staking"   && <Staking setPage={setPage}/>}
+      {page==="landing"    && <Landing setPage={setPage}/>}
+      {page==="staking"    && <Staking setPage={setPage}/>}
+      {page==="get-access" && <GetAccess/>}
       {page==="dashboard" && (
         <Dashboard
           threats={threats}           setThreats={setThreats}
