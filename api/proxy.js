@@ -15,10 +15,17 @@
  *   Body: standard OpenAI or Anthropic messages payload
  */
 
+import { createClient } from "@supabase/supabase-js";
 import { normaliseRequest, blockResponse, PROVIDERS } from "../lib/providers.js";
 
-const DETECTION_URL = process.env.DETECTION_URL || "http://localhost:3001/api/detect";
+const DETECTION_URL    = process.env.DETECTION_URL || "http://localhost:3001/api/detect";
 const RECUR_API_SECRET = process.env.RECUR_API_SECRET;
+const SUPABASE_URL     = process.env.SUPABASE_URL     || process.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const supabaseAdmin = (SUPABASE_URL && SUPABASE_SERVICE)
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE)
+  : null;
 
 export default async function handler(req, res) {
 
@@ -36,8 +43,13 @@ export default async function handler(req, res) {
 
     // ── AUTH ──
     const apiKey = req.headers["x-recur-api-key"];
-    if (RECUR_API_SECRET && apiKey !== RECUR_API_SECRET) {
-      return res.status(401).json({ error: "Invalid RECUR API key" });
+    if (!apiKey) {
+      return res.status(401).json({ error: "x-recur-api-key header required" });
+    }
+
+    const authResult = await validateApiKey(apiKey);
+    if (!authResult.valid) {
+      return res.status(401).json({ error: authResult.reason });
     }
 
     // ── PROVIDER ──
@@ -217,6 +229,44 @@ function hashIp(ip) {
     h = (Math.imul(31, h) + ip.charCodeAt(i)) | 0;
   }
   return Math.abs(h).toString(16);
+}
+
+// ─────────────────────────────────────────────
+// API KEY VALIDATION
+// ─────────────────────────────────────────────
+
+async function validateApiKey(key) {
+  // 1. Legacy: accept the master secret (for internal/testing use)
+  if (RECUR_API_SECRET && key === RECUR_API_SECRET) {
+    return { valid: true };
+  }
+
+  // 2. Supabase: look up recur_live_ keys
+  if (supabaseAdmin && key.startsWith("recur_live_")) {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("api_keys")
+        .select("id, active")
+        .eq("api_key", key)
+        .limit(1)
+        .single();
+
+      if (error || !data)     return { valid: false, reason: "Invalid API key" };
+      if (!data.active)       return { valid: false, reason: "API key has been deactivated" };
+      return { valid: true };
+    } catch {
+      // If Supabase is unreachable, fall through to legacy check
+      console.warn("Supabase unreachable during key validation — failing open");
+      return { valid: true };
+    }
+  }
+
+  // 3. No Supabase configured — accept any key if no secret is set (open beta)
+  if (!RECUR_API_SECRET && !supabaseAdmin) {
+    return { valid: true };
+  }
+
+  return { valid: false, reason: "Invalid API key" };
 }
 
 // ─────────────────────────────────────────────
