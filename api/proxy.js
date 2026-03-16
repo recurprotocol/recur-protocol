@@ -15,6 +15,7 @@
  *   Body: standard OpenAI or Anthropic messages payload
  */
 
+import { createHash } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { normaliseRequest, blockResponse, PROVIDERS } from "../lib/providers.js";
 
@@ -23,9 +24,51 @@ const RECUR_API_SECRET = process.env.RECUR_API_SECRET;
 const SUPABASE_URL     = process.env.SUPABASE_URL     || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+const RATE_LIMIT_MAX     = 60;   // requests per window
+const RATE_LIMIT_WINDOW  = 60000; // 1 minute in ms
+
 const supabaseAdmin = (SUPABASE_URL && SUPABASE_SERVICE)
   ? createClient(SUPABASE_URL, SUPABASE_SERVICE)
   : null;
+
+function sha256(input) {
+  return createHash("sha256").update(input).digest("hex");
+}
+
+// ─────────────────────────────────────────────
+// IN-MEMORY RATE LIMITER
+// ─────────────────────────────────────────────
+
+const rateBuckets = new Map();
+
+function checkRateLimit(keyHash) {
+  const now = Date.now();
+  let bucket = rateBuckets.get(keyHash);
+
+  if (!bucket) {
+    bucket = { timestamps: [] };
+    rateBuckets.set(keyHash, bucket);
+  }
+
+  // Evict expired entries
+  bucket.timestamps = bucket.timestamps.filter(ts => now - ts < RATE_LIMIT_WINDOW);
+
+  if (bucket.timestamps.length >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  bucket.timestamps.push(now);
+  return { allowed: true, remaining: RATE_LIMIT_MAX - bucket.timestamps.length };
+}
+
+// Periodic cleanup to prevent memory leak from expired keys
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, bucket] of rateBuckets) {
+    bucket.timestamps = bucket.timestamps.filter(ts => now - ts < RATE_LIMIT_WINDOW);
+    if (bucket.timestamps.length === 0) rateBuckets.delete(key);
+  }
+}, 60000);
 
 export default async function handler(req, res) {
 
@@ -50,6 +93,15 @@ export default async function handler(req, res) {
     const authResult = await validateApiKey(apiKey);
     if (!authResult.valid) {
       return res.status(401).json({ error: authResult.reason });
+    }
+
+    // ── RATE LIMIT ──
+    const keyIdentifier = authResult.keyHash || sha256(apiKey);
+    const rateResult = checkRateLimit(keyIdentifier);
+    res.setHeader("X-RateLimit-Limit", RATE_LIMIT_MAX);
+    res.setHeader("X-RateLimit-Remaining", rateResult.remaining);
+    if (!rateResult.allowed) {
+      return res.status(429).json({ error: "Rate limit exceeded. Max 60 requests per minute." });
     }
 
     // ── PROVIDER ──
@@ -148,15 +200,14 @@ async function runDetection(payload) {
     return await response.json();
 
   } catch (err) {
-    // If detection engine is unreachable, fail open with a warning
-    // In production you may want to fail closed — configurable
-    console.warn("Detection engine unreachable — failing open:", err.message);
+    // Fail closed — if detection is unreachable, block the request
+    console.error("Detection engine unreachable — failing closed:", err.message);
     return {
-      blocked: false,
+      blocked: true,
       severity: "UNKNOWN",
       confidence: 0,
-      threats: [],
-      primary_threat: null,
+      threats: [{ type: "SENTINEL_OFFLINE", matched: "detection_unreachable", confidence: 0 }],
+      primary_threat: "SENTINEL_OFFLINE",
       sentinel: "OFFLINE",
     };
   }
@@ -323,32 +374,32 @@ function hashIp(ip) {
 async function validateApiKey(key) {
   // 1. Legacy: accept the master secret (for internal/testing use)
   if (RECUR_API_SECRET && key === RECUR_API_SECRET) {
-    return { valid: true };
+    return { valid: true, keyHash: sha256(key) };
   }
 
-  // 2. Supabase: look up recur_live_ keys
+  // 2. Supabase: look up recur_live_ keys by SHA-256 hash
   if (supabaseAdmin && key.startsWith("recur_live_")) {
+    const keyHash = sha256(key);
     try {
       const { data, error } = await supabaseAdmin
         .from("api_keys")
         .select("id, active")
-        .eq("api_key", key)
+        .eq("api_key", keyHash)
         .limit(1)
         .single();
 
       if (error || !data)     return { valid: false, reason: "Invalid API key" };
       if (!data.active)       return { valid: false, reason: "API key has been deactivated" };
-      return { valid: true };
+      return { valid: true, keyHash };
     } catch {
-      // If Supabase is unreachable, fall through to legacy check
-      console.warn("Supabase unreachable during key validation — failing open");
-      return { valid: true };
+      console.warn("Supabase unreachable during key validation");
+      return { valid: false, reason: "Authentication service unavailable" };
     }
   }
 
   // 3. No Supabase configured — accept any key if no secret is set (open beta)
   if (!RECUR_API_SECRET && !supabaseAdmin) {
-    return { valid: true };
+    return { valid: true, keyHash: sha256(key) };
   }
 
   return { valid: false, reason: "Invalid API key" };

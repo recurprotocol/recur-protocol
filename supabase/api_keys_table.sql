@@ -1,9 +1,11 @@
 -- Create api_keys table
+-- NOTE: api_key column stores SHA-256 hashes, not plaintext keys.
+-- The plaintext key is shown to the user once at generation time and never stored.
 create table if not exists api_keys (
   id          uuid default gen_random_uuid() primary key,
   email       text not null,
   use_case    text not null,
-  api_key     text not null unique,
+  api_key     text not null unique,  -- SHA-256 hash of recur_live_... key
   created_at  timestamptz default now(),
   active      boolean default true
 );

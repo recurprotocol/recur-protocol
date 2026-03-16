@@ -1434,6 +1434,12 @@ function GetAccess({setPage}) {
     return `recur_live_${hex}`;
   };
 
+  const hashKey = async (key) => {
+    const encoded = new TextEncoder().encode(key);
+    const buffer = await crypto.subtle.digest("SHA-256", encoded);
+    return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -1443,11 +1449,12 @@ function GetAccess({setPage}) {
 
     setLoading(true);
     const apiKey = generateKey();
+    const keyHash = await hashKey(apiKey);
 
     const { error: dbError } = await supabase.from("api_keys").insert({
       email: email.trim(),
       use_case: useCase.trim(),
-      api_key: apiKey,
+      api_key: keyHash,
       active: true,
     });
 
