@@ -174,10 +174,12 @@ function analyse({ prompt_text = "", messages = [], system_prompt = null }) {
 // VERCEL HANDLER
 // ─────────────────────────────────────────────
 
+const RECUR_API_SECRET = process.env.RECUR_API_SECRET;
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-recur-internal-secret");
 
   if (req.method === "OPTIONS") return res.status(200).end();
 
@@ -190,11 +192,16 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
+    // Only allow internal calls from the proxy
+    if (RECUR_API_SECRET && req.headers["x-recur-internal-secret"] !== RECUR_API_SECRET) {
+      return res.status(401).json({ error: "Unauthorised" });
+    }
+
     try {
       const result = analyse(req.body || {});
       return res.status(200).json(result);
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
+    } catch {
+      return res.status(500).json({ error: "Detection engine error" });
     }
   }
 

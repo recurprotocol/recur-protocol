@@ -124,7 +124,7 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error("RECUR proxy error:", err);
-    return res.status(500).json({ error: "Internal sentinel error", message: err.message });
+    return res.status(500).json({ error: "Internal sentinel error" });
   }
 }
 
@@ -134,9 +134,12 @@ export default async function handler(req, res) {
 
 async function runDetection(payload) {
   try {
+    const headers = { "Content-Type": "application/json" };
+    if (RECUR_API_SECRET) headers["x-recur-internal-secret"] = RECUR_API_SECRET;
+
     const response = await fetch(DETECTION_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(3000), // 3s timeout — security can't slow down the happy path too much
     });
