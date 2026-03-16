@@ -10,7 +10,7 @@
  *   POST /api/proxy
  *   Headers:
  *     x-recur-api-key: <your RECUR API key>
- *     x-recur-provider: openai | anthropic
+ *     x-recur-provider: openai | anthropic | groq | openrouter | mistral | gemini
  *     x-recur-target-key: <your provider API key>
  *   Body: standard OpenAI or Anthropic messages payload
  */
@@ -164,40 +164,122 @@ async function runDetection(payload) {
 // ─────────────────────────────────────────────
 
 async function forwardToProvider(provider, apiKey, body) {
+  // ── OpenAI ──
   if (provider === "openai") {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || "OpenAI error");
-    }
-    return response.json();
+    return fetchJson("https://api.openai.com/v1/chat/completions", {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    }, body, "OpenAI");
   }
 
+  // ── Anthropic ──
   if (provider === "anthropic") {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || "Anthropic error");
-    }
-    return response.json();
+    return fetchJson("https://api.anthropic.com/v1/messages", {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    }, body, "Anthropic");
+  }
+
+  // ── Groq (OpenAI-compatible) ──
+  if (provider === "groq") {
+    return fetchJson("https://api.groq.com/openai/v1/chat/completions", {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    }, body, "Groq");
+  }
+
+  // ── OpenRouter (OpenAI-compatible + extra headers) ──
+  if (provider === "openrouter") {
+    return fetchJson("https://openrouter.ai/api/v1/chat/completions", {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+      "HTTP-Referer": "https://recur-protocol.com",
+      "X-Title": "RECUR Protocol",
+    }, body, "OpenRouter");
+  }
+
+  // ── Mistral (OpenAI-compatible) ──
+  if (provider === "mistral") {
+    return fetchJson("https://api.mistral.ai/v1/chat/completions", {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    }, body, "Mistral");
+  }
+
+  // ── Google Gemini (needs format translation) ──
+  if (provider === "gemini") {
+    return forwardToGemini(apiKey, body);
   }
 
   throw new Error(`Unsupported provider: ${provider}`);
+}
+
+async function fetchJson(url, headers, body, label) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `${label} error (${response.status})`);
+  }
+  return response.json();
+}
+
+async function forwardToGemini(apiKey, body) {
+  const model = body.model || "gemini-1.5-flash";
+
+  // Translate OpenAI messages → Gemini contents
+  const systemParts = [];
+  const contents = [];
+  for (const msg of (body.messages || [])) {
+    if (msg.role === "system") {
+      systemParts.push({ text: msg.content });
+    } else {
+      contents.push({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content }],
+      });
+    }
+  }
+
+  const geminiBody = { contents };
+  if (systemParts.length > 0) {
+    geminiBody.systemInstruction = { parts: systemParts };
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(geminiBody),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Gemini error (${response.status})`);
+  }
+  const geminiRes = await response.json();
+
+  // Translate Gemini response → OpenAI-compatible format
+  const text = geminiRes.candidates?.[0]?.content?.parts
+    ?.map(p => p.text).join("") || "";
+  return {
+    id: `gemini-${Date.now()}`,
+    object: "chat.completion",
+    model,
+    choices: [{
+      index: 0,
+      message: { role: "assistant", content: text },
+      finish_reason: geminiRes.candidates?.[0]?.finishReason === "STOP" ? "stop" : "stop",
+    }],
+    usage: {
+      prompt_tokens: geminiRes.usageMetadata?.promptTokenCount || 0,
+      completion_tokens: geminiRes.usageMetadata?.candidatesTokenCount || 0,
+      total_tokens: geminiRes.usageMetadata?.totalTokenCount || 0,
+    },
+  };
 }
 
 // ─────────────────────────────────────────────

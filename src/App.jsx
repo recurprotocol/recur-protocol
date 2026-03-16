@@ -578,12 +578,12 @@ fetch("https://api.openai.com/v1/chat/completions", {
   body: JSON.stringify({ model: "gpt-4o-mini", messages })
 });
 
-// After — protected by RECUR
+// After — protected by RECUR (works with any provider)
 fetch("https://recur-protocol.vercel.app/api/proxy", {
   headers: {
-    "x-recur-provider":    "openai",
+    "x-recur-provider":    "openai",  // openai | anthropic | groq | openrouter | mistral | gemini
     "x-recur-api-key":     RECUR_KEY,
-    "x-recur-target-key":  OPENAI_KEY,
+    "x-recur-target-key":  PROVIDER_KEY,
   },
   body: JSON.stringify({ model: "gpt-4o-mini", messages })
 });`;
@@ -1255,8 +1255,8 @@ function GetAccess() {
   headers: {
     "Content-Type": "application/json",
     "x-recur-api-key": "${generatedKey}",
-    "x-recur-provider": "openai",
-    "x-recur-target-key": YOUR_OPENAI_KEY,
+    "x-recur-provider": "openai",  // or: anthropic, groq, openrouter, mistral, gemini
+    "x-recur-target-key": YOUR_PROVIDER_KEY,
   },
   body: JSON.stringify({ model: "gpt-4o-mini", messages })
 });`}</pre>

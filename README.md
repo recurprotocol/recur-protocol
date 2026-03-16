@@ -1,6 +1,6 @@
 # RECUR Protocol
 
-Self-evolving AI security sentinels. Intercepts prompts destined for OpenAI and Anthropic, detects and blocks adversarial attacks, and logs every event.
+Self-evolving AI security sentinels. Intercepts prompts destined for OpenAI, Anthropic, Groq, OpenRouter, Mistral, and Google Gemini — detects and blocks adversarial attacks, and logs every event.
 
 ---
 
@@ -11,7 +11,7 @@ Self-evolving AI security sentinels. Intercepts prompts destined for OpenAI and 
 Drop-in AI security proxy. No wallet, no token required. Replace your OpenAI or Anthropic endpoint and you're protected.
 
 - **Production endpoint:** `https://recur-protocol.vercel.app/api/proxy`
-- Works with OpenAI and Anthropic today
+- Works with OpenAI, Anthropic, Groq, OpenRouter, Mistral, and Google Gemini
 - 5 attack categories, 40+ detection signatures, <5ms latency overhead
 - No SDK, no code changes to your application logic
 
@@ -35,7 +35,7 @@ POST /api/proxy          ← Node.js — receives & routes requests
   ↓
 POST /api/detect         ← Detection engine — injection/jailbreak/extraction analysis
   ↓ (blocked or clean)
-OpenAI / Anthropic       ← clean requests forwarded to provider
+Provider API             ← clean requests forwarded (OpenAI/Anthropic/Groq/OpenRouter/Mistral/Gemini)
   ↓
 POST /api/threats        ← event logged with full threat metadata
   ↓
@@ -58,7 +58,18 @@ Response to client       ← provider response + RECUR metadata attached
 
 ## Using the Proxy
 
-Replace your OpenAI or Anthropic API call with a call to RECUR's proxy. No wallet required. No token required.
+Replace your AI provider API call with a call to RECUR's proxy. No wallet required. No token required.
+
+### Supported Providers
+
+| Provider | `x-recur-provider` | Format |
+|---|---|---|
+| OpenAI | `openai` | Native |
+| Anthropic | `anthropic` | Native |
+| Groq | `groq` | OpenAI-compatible |
+| OpenRouter | `openrouter` | OpenAI-compatible |
+| Mistral | `mistral` | OpenAI-compatible |
+| Google Gemini | `gemini` | Auto-translated from OpenAI format |
 
 ### OpenAI Example
 
@@ -102,6 +113,40 @@ const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
     max_tokens: 1024,
     messages
   })
+});
+```
+
+### Groq / Mistral / OpenRouter
+
+All three use OpenAI-compatible format — just change the provider header and key:
+
+```javascript
+const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "x-recur-api-key": "your-recur-key",
+    "x-recur-provider": "groq",        // or "mistral" or "openrouter"
+    "x-recur-target-key": GROQ_KEY,     // your provider's API key
+  },
+  body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages })
+});
+```
+
+### Google Gemini
+
+Send OpenAI-style messages — RECUR translates to Gemini format automatically:
+
+```javascript
+const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "x-recur-api-key": "your-recur-key",
+    "x-recur-provider": "gemini",
+    "x-recur-target-key": GEMINI_KEY,
+  },
+  body: JSON.stringify({ model: "gemini-1.5-flash", messages })
 });
 ```
 
@@ -186,7 +231,7 @@ Set `RECUR_API_SECRET` in Vercel environment variables before deploying.
 
 ## Roadmap
 
-- [x] Live proxy with OpenAI and Anthropic support
+- [x] Live proxy with OpenAI, Anthropic, Groq, OpenRouter, Mistral, and Gemini support
 - [x] Real-time threat dashboard
 - [x] Solana staking program (devnet)
 - [ ] Vercel KV / Upstash Redis for persistent event storage
