@@ -10,7 +10,7 @@ Self-evolving AI security sentinels. Intercepts prompts destined for OpenAI, Ant
 
 Drop-in AI security proxy. No wallet, no token required. Replace your OpenAI or Anthropic endpoint and you're protected.
 
-- **Production endpoint:** `https://recur-protocol.vercel.app/api/proxy`
+- **Production endpoint:** `https://recur-protocol.com/api/proxy`
 - Works with OpenAI, Anthropic, Groq, OpenRouter, Mistral, and Google Gemini
 - 5 attack categories, 40+ detection signatures, <5ms latency overhead
 - No SDK, no code changes to your application logic
@@ -85,7 +85,7 @@ const response = await fetch("https://api.openai.com/v1/chat/completions", {
 });
 
 // After — through RECUR
-const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
+const response = await fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -100,7 +100,7 @@ const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
 ### Anthropic Example
 
 ```javascript
-const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
+const response = await fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -121,7 +121,7 @@ const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
 All three use OpenAI-compatible format — just change the provider header and key:
 
 ```javascript
-const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
+const response = await fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -138,7 +138,7 @@ const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
 Send OpenAI-style messages — RECUR translates to Gemini format automatically:
 
 ```javascript
-const response = await fetch("https://recur-protocol.vercel.app/api/proxy", {
+const response = await fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -205,21 +205,21 @@ const headers = {
 };
 
 // OpenAI
-await fetch("https://recur-protocol.vercel.app/api/proxy", {
+await fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: { ...headers, "x-recur-provider": "openai", "x-recur-target-key": OPENAI_KEY },
   body: JSON.stringify({ model: "gpt-4o-mini", messages })
 });
 
 // Anthropic
-await fetch("https://recur-protocol.vercel.app/api/proxy", {
+await fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: { ...headers, "x-recur-provider": "anthropic", "x-recur-target-key": ANTHROPIC_KEY },
   body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1024, messages })
 });
 
 // Gemini
-await fetch("https://recur-protocol.vercel.app/api/proxy", {
+await fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: { ...headers, "x-recur-provider": "gemini", "x-recur-target-key": GEMINI_KEY },
   body: JSON.stringify({ model: "gemini-1.5-flash", messages })
@@ -255,7 +255,7 @@ Set these in Vercel dashboard or `.env.local` for local dev:
 
 ```
 RECUR_API_SECRET=your-secret-key-here
-DETECTION_URL=https://recur-protocol.vercel.app/api/detect
+DETECTION_URL=https://recur-protocol.com/api/detect
 ```
 
 ---

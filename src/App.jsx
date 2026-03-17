@@ -589,7 +589,7 @@ fetch("https://api.openai.com/v1/chat/completions", {
 });
 
 // After — protected by RECUR (works with any provider)
-fetch("https://recur-protocol.vercel.app/api/proxy", {
+fetch("https://recur-protocol.com/api/proxy", {
   headers: {
     "x-recur-provider":    "openai",  // openai | anthropic | groq | openrouter | mistral | gemini
     "x-recur-api-key":     RECUR_KEY,
@@ -1227,7 +1227,7 @@ function Docs({setPage}) {
             <p style={{fontSize:11,color:"var(--text-d)",lineHeight:1.85,marginBottom:16}}>
               <strong style={{color:"#ffffff"}}>2.</strong> Replace your provider endpoint with the RECUR proxy:
             </p>
-            <Code>{`fetch("https://recur-protocol.vercel.app/api/proxy", {
+            <Code>{`fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -1600,7 +1600,7 @@ function GetAccess({setPage}) {
             <Panel style={{padding:"20px",textAlign:"left"}}>
               <div style={{fontSize:9,letterSpacing:3,color:"var(--text-d)",marginBottom:10}}>QUICK START</div>
               <pre style={{fontFamily:"'Fira Code',monospace",fontSize:10,color:"var(--text)",
-                lineHeight:1.9,overflowX:"auto",whiteSpace:"pre-wrap"}}>{`fetch("https://recur-protocol.vercel.app/api/proxy", {
+                lineHeight:1.9,overflowX:"auto",whiteSpace:"pre-wrap"}}>{`fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
