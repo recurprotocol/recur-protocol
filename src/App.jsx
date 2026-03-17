@@ -788,10 +788,17 @@ fetch("https://recur-protocol.vercel.app/api/proxy", {
           RECUR PROTOCOL
         </div>
         <div style={{fontSize:9,color:"var(--text-d)",letterSpacing:2}}>BUILT FOR SOLANA · {new Date().getFullYear()}</div>
-        <a href="https://github.com/recurprotocol/recur-protocol" target="_blank" rel="noreferrer"
-          style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,textDecoration:"none",transition:"color 0.2s"}}
-          onMouseEnter={e=>e.target.style.color="#ffffff"}
-          onMouseLeave={e=>e.target.style.color="var(--text-d)"}>GITHUB ↗</a>
+        <div style={{display:"flex",gap:16,alignItems:"center"}}>
+          <a href="https://github.com/recurprotocol/recur-protocol" target="_blank" rel="noreferrer"
+            style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,textDecoration:"none",transition:"color 0.2s"}}
+            onMouseEnter={e=>e.target.style.color="#ffffff"}
+            onMouseLeave={e=>e.target.style.color="var(--text-d)"}>GITHUB ↗</a>
+          <span style={{color:"var(--border)"}}>·</span>
+          <a href="https://x.com/recur_protocol" target="_blank" rel="noreferrer"
+            style={{fontSize:9,color:"var(--text-d)",letterSpacing:2,textDecoration:"none",transition:"color 0.2s"}}
+            onMouseEnter={e=>e.target.style.color="#ffffff"}
+            onMouseLeave={e=>e.target.style.color="var(--text-d)"}>SUPPORT ↗</a>
+        </div>
       </footer>
     </div>
   );
