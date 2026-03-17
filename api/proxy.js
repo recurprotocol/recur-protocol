@@ -19,7 +19,7 @@
  *   SUPABASE_URL              — Supabase project URL
  *   SUPABASE_SERVICE_ROLE_KEY — Supabase service role key
  *   ATTESTER_KEYPAIR          — base58-encoded Solana private key for on-chain attestation
- *   SOLANA_RPC_URL             — Solana RPC endpoint (defaults to mainnet-beta)
+ *   SOLANA_RPC_URL             — Solana RPC endpoint (defaults to devnet)
  */
 
 import { createHash } from "crypto";
@@ -322,10 +322,10 @@ async function forwardToGemini(apiKey, body) {
     geminiBody.systemInstruction = { parts: systemParts };
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
     body: JSON.stringify(geminiBody),
   });
   if (!response.ok) {
@@ -344,7 +344,7 @@ async function forwardToGemini(apiKey, body) {
     choices: [{
       index: 0,
       message: { role: "assistant", content: text },
-      finish_reason: geminiRes.candidates?.[0]?.finishReason === "STOP" ? "stop" : "stop",
+      finish_reason: "stop",
     }],
     usage: {
       prompt_tokens: geminiRes.usageMetadata?.promptTokenCount || 0,
@@ -463,7 +463,7 @@ async function attestOnChain(event, promptText) {
   const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
   const program = new Program(ATTESTATION_IDL, ATTESTATION_PROGRAM, provider);
 
-  // Keccak256 hash of the prompt (not SHA-256 — using createHash which supports keccak)
+  // SHA-256 hash of the prompt text for on-chain storage (no raw prompt stored)
   const promptHash = Array.from(createHash("sha256").update(promptText || "").digest());
 
   const eventId = (event.id || "").slice(0, 36);

@@ -111,7 +111,10 @@ function checkRoleEscalation(messages = []) {
 // MAIN ANALYSIS
 // ─────────────────────────────────────────────
 
-function analyse({ prompt_text = "", messages = [], system_prompt = null }) {
+function analyse({ prompt_text = "", messages = [], system_prompt: _system_prompt = null }) {
+  // system_prompt is accepted but intentionally not scanned — it contains
+  // legitimate instructions that would trigger false positives on injection patterns.
+  // Only user-controlled text (prompt_text, messages) is analysed.
   const text = prompt_text;
   const threats = [];
   let maxConfidence = 0.0;

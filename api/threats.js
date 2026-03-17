@@ -58,7 +58,7 @@ export default async function handler(req, res) {
 
 // GET is public — stats and events are not sensitive
 
-    const limit  = Math.min(parseInt(req.query?.limit || "50"), 200);
+    const limit  = Math.min(parseInt(req.query?.limit || "50", 10), 200);
     const filter = req.query?.status; // BLOCKED | CLEAN
     const since  = req.query?.since ? new Date(req.query.since) : null;
 

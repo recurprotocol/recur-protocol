@@ -6,7 +6,9 @@
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  const DETECTION_URL = process.env.DETECTION_URL || "http://localhost:3001/api/detect";
+  const host = req.headers.host || "localhost:3000";
+  const proto = host.includes("localhost") ? "http" : "https";
+  const DETECTION_URL = process.env.DETECTION_URL || `${proto}://${host}/api/detect`;
 
   // Ping the detection engine
   let detectionStatus = "UNKNOWN";
