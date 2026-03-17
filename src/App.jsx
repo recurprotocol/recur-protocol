@@ -47,6 +47,14 @@ const css = `
     .cta-row > * { width: 100% !important; text-align: center !important; }
     .footer-inner { flex-direction: column !important; gap: 12px !important; text-align: center !important; }
     .dash-tabs { overflow-x: auto !important; flex-wrap: nowrap !important; }
+    .footer-pad { padding-left: 16px !important; padding-right: 16px !important; }
+    .nav-bar { padding: 0 12px !important; gap: 12px !important; }
+    .nav-right-btns { display: none !important; }
+    .nav-status { display: none !important; }
+    .stat-bar-border > div { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
+    .stat-bar-border > div:last-child { border-bottom: none !important; }
+    .code-block pre { font-size: 9px !important; }
+    .sentinel-tree-item { margin-left: 0 !important; }
   }
   @media(min-width:769px) {
     .nav-hamburger { display: none !important; }
@@ -153,14 +161,14 @@ function Nav({page, setPage, apiOnline}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <nav style={{
+    <nav className="nav-bar" style={{
       position:"fixed",top:0,left:0,right:0,zIndex:1000,
       background:"var(--bg)",borderBottom:"1px solid var(--border)",
       display:"flex",alignItems:"center",
       padding:"0 32px",height:54,gap:32,
     }}>
-      <div onClick={()=>setPage("landing")} style={{cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center"}}>
-        <img src="/logo.png" alt="RECUR" style={{height:36,width:36,objectFit:"contain"}}/>
+      <div onClick={()=>setPage("landing")} style={{cursor:"pointer",flexShrink:0}}>
+        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,letterSpacing:3,color:"var(--text-primary)"}}>RECUR</span>
       </div>
       <div style={{width:1,height:20,background:"var(--border)"}}/>
 
@@ -266,7 +274,7 @@ function Nav({page, setPage, apiOnline}) {
         <div style={{width:20,height:2,background:"var(--text-primary)",borderRadius:1}}/>
       </div>
 
-      <div style={{display:"flex",alignItems:"center",gap:6,fontSize:9}}>
+      <div className="nav-status" style={{display:"flex",alignItems:"center",gap:6,fontSize:9}}>
         <div style={{
           width:7,height:7,borderRadius:"50%",flexShrink:0,
           background:apiOnline?"var(--accent)":"var(--warning)",
@@ -279,6 +287,7 @@ function Nav({page, setPage, apiOnline}) {
         </div>
       </div>
 
+      <div className="nav-right-btns" style={{display:"flex",gap:8,alignItems:"center"}}>
       <button onClick={()=>setPage("get-access")} style={{
         fontFamily:"'JetBrains Mono',monospace",fontSize:13,letterSpacing:3,
         padding:"5px 16px",flexShrink:0,
@@ -299,6 +308,7 @@ function Nav({page, setPage, apiOnline}) {
         onMouseEnter={e=>{e.target.style.borderColor="var(--text-secondary)"}}
         onMouseLeave={e=>{e.target.style.borderColor="var(--border)"}}>VIEW DASHBOARD →</button>
       )}
+      </div>
 
       {/* Mobile dropdown menu */}
       {mobileMenuOpen && (
@@ -605,7 +615,7 @@ function Staking({setPage}) {
       </section>
 
       {/* Footer */}
-      <footer style={{borderTop:"1px solid var(--border-muted)",padding:"24px 64px"}}>
+      <footer className="footer-pad" style={{borderTop:"1px solid var(--border-muted)",padding:"24px 64px"}}>
         <div className="footer-inner" style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,letterSpacing:5,color:"var(--text-secondary)"}}>
             RECUR PROTOCOL
@@ -700,7 +710,7 @@ fetch("https://recur-protocol.com/api/proxy", {
 
       <section style={{borderTop:"1px solid var(--border)",borderBottom:"1px solid var(--border)",
         background:"var(--surface)"}}>
-        <div className="grid-4" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)"}}>
+        <div className="grid-4 stat-bar-border" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)"}}>
           {[{v:"5",l:"Attack Categories"},{v:"40+",l:"Detection Signatures"},{v:"<5ms",l:"Latency Overhead"},{v:"SOL",l:"Chain"}]
             .map((s,i)=>(
             <div key={i} style={{padding:"32px 24px",textAlign:"center",
@@ -831,7 +841,7 @@ fetch("https://recur-protocol.com/api/proxy", {
         </button>
       </section>
 
-      <footer style={{borderTop:"1px solid var(--border-muted)",padding:"24px 64px"}}>
+      <footer className="footer-pad" style={{borderTop:"1px solid var(--border-muted)",padding:"24px 64px"}}>
         <div className="footer-inner" style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,letterSpacing:5,color:"var(--text-secondary)"}}>
             RECUR PROTOCOL
