@@ -36,7 +36,7 @@ const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RATE_LIMIT_MAX     = 60;   // requests per window
 const RATE_LIMIT_WINDOW  = 60000; // 1 minute in ms
 
-const SOLANA_RPC_URL       = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
+const SOLANA_RPC_URL       = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
 const ATTESTER_KEYPAIR_B58 = process.env.ATTESTER_KEYPAIR;
 const ATTESTATION_PROGRAM  = new PublicKey("3ZLSqgGoUH3cQbDLV6QXDLRXGzgCsmY9oMGx8qwMM24Y");
 

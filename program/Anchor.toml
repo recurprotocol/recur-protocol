@@ -10,8 +10,6 @@ recur_attestation = "3ZLSqgGoUH3cQbDLV6QXDLRXGzgCsmY9oMGx8qwMM24Y"
 recur_staking     = "B9yz27EvNVFyh8LwqCqviRX3R24YM3UmC2X2dff6kTKj"
 recur_attestation = "3ZLSqgGoUH3cQbDLV6QXDLRXGzgCsmY9oMGx8qwMM24Y"
 
-[programs.mainnet]
-recur_attestation = "3ZLSqgGoUH3cQbDLV6QXDLRXGzgCsmY9oMGx8qwMM24Y"
 
 [registry]
 url = "https://api.apr.dev"

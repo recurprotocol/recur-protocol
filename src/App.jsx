@@ -83,6 +83,7 @@ const backendEventToThreat = (evt) => ({
   source: `${evt.provider||"unknown"}-${(evt.ip_hash||"????").slice(0,4)}`,
   severity: evt.severity||"MEDIUM",
   target: IP_ASSETS[Math.floor(Math.random()*IP_ASSETS.length)].name,
+  tx_sig: evt.tx_sig||null,
   blocked: evt.status==="BLOCKED",
   ts: evt.timestamp?new Date(evt.timestamp).toISOString().slice(11,23):new Date().toISOString().slice(11,23),
   isReal: true,
@@ -838,10 +839,20 @@ function ThreatFeedPanel({threats}) {
                   {t.confidence>0&&<span style={{color:"var(--text-d)",marginLeft:8}}>{(t.confidence*100).toFixed(0)}% conf</span>}
                 </div>
               </div>
-              <div style={{textAlign:"right"}}>
+              <div style={{textAlign:"right",display:"flex",flexDirection:"column",gap:3,alignItems:"flex-end"}}>
                 {t.blocked
                   ?<span style={{fontSize:9,color:"#ffffff",padding:"1px 5px",background:"rgba(0,255,65,0.1)",border:"1px solid rgba(0,255,65,0.3)"}}>BLOCKED</span>
                   :<span style={{fontSize:9,color:"#ff0033",padding:"1px 5px",background:"rgba(255,0,51,0.1)",border:"1px solid rgba(255,0,51,0.3)",animation:"pulse-red 1.5s infinite"}}>BREACH</span>}
+                {t.tx_sig&&(
+                  <a href={`https://explorer.solana.com/tx/${t.tx_sig}?cluster=devnet`} target="_blank" rel="noreferrer"
+                    style={{fontSize:8,color:"var(--green)",letterSpacing:1,textDecoration:"none",
+                      padding:"1px 4px",background:"rgba(0,255,65,0.06)",border:"1px solid rgba(0,255,65,0.2)",
+                      transition:"background 0.15s"}}
+                    onMouseEnter={e=>e.target.style.background="rgba(0,255,65,0.15)"}
+                    onMouseLeave={e=>e.target.style.background="rgba(0,255,65,0.06)"}>
+                    ATTESTED ↗
+                  </a>
+                )}
               </div>
             </div>
           );
