@@ -10,11 +10,11 @@ The RECUR staking program allows $RECUR token holders to stake and earn rewards.
 
 ## Node Tiers
 
-| Tier  | Minimum Stake  | Multiplier | Slots      |
-|-------|---------------|------------|------------|
-| NANO  | 1,000 $RECUR  | 1.0x       | Unlimited  |
-| WARD  | 10,000 $RECUR | 1.75x      | 500        |
-| PRIME | 50,000 $RECUR | 2.75x      | 50         |
+| Tier  | Minimum Stake      | Multiplier | Activation     |
+|-------|--------------------|------------|----------------|
+| NANO  | 10,000 $RECUR      | 1.0x       | Immediate      |
+| WARD  | 100,000 $RECUR     | 1.25x      | After 3 months |
+| PRIME | 1,000,000 $RECUR   | 1.5x       | After 3 months |
 
 ## Lock Durations & APY
 
@@ -40,7 +40,7 @@ The RECUR staking program allows $RECUR token holders to stake and earn rewards.
 
 Rewards are distributed weekly every Sunday 12:00 UTC:
 ```
-reward = amount * APY * elapsed_weeks / 52
+reward = amount * APY_bps * multiplier_bps * elapsed_weeks / (52 * 10000 * 10000)
 ```
 
 - **Token:** $RECUR staked to earn $RECUR
@@ -71,6 +71,6 @@ anchor test
 - [x] Core instructions (stake, unstake, claim, slash)
 - [x] Lock duration tiers with variable APY
 - [x] Auto-compounding
-- [ ] Security audit
-- [ ] Devnet deployment
+- [x] Security audit (lock bypass, uptime reset, mint constraints, key hashing)
+- [x] Devnet deployment (`B9yz27EvNVFyh8LwqCqviRX3R24YM3UmC2X2dff6kTKj`)
 - [ ] Mainnet launch

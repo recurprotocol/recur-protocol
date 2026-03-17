@@ -8,7 +8,7 @@ Self-evolving AI security sentinels. Intercepts prompts destined for OpenAI, Ant
 
 ### Layer 1 — Proxy (Live)
 
-Drop-in AI security proxy. No wallet, no token required. Replace your OpenAI or Anthropic endpoint and you're protected.
+Drop-in AI security proxy. No wallet, no token required. Replace your AI provider endpoint and you're protected.
 
 - **Production endpoint:** `https://recur-protocol.com/api/proxy`
 - Works with OpenAI, Anthropic, Groq, OpenRouter, Mistral, and Google Gemini
@@ -48,7 +48,7 @@ Response to client       ← provider response + RECUR metadata attached
 
 | Endpoint | Method | Description |
 |---|---|---|
-| `/api/proxy` | POST | Main entry point — wraps OpenAI/Anthropic |
+| `/api/proxy` | POST | Main entry point — wraps all supported providers |
 | `/api/detect` | POST | Detection engine — threat analysis |
 | `/api/threats` | GET | Retrieve threat event log + stats |
 | `/api/threats` | POST | Log a threat event (called internally by proxy) |
@@ -254,8 +254,23 @@ Supported values for `x-recur-provider`: `openai`, `anthropic`, `groq`, `openrou
 Set these in Vercel dashboard or `.env.local` for local dev:
 
 ```
+# Proxy auth
 RECUR_API_SECRET=your-secret-key-here
+
+# Detection
 DETECTION_URL=https://recur-protocol.com/api/detect
+
+# Supabase (server-side — proxy key validation)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Supabase (client-side — API key signup form)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+
+# On-chain attestation (optional)
+ATTESTER_KEYPAIR=base58-encoded-private-key
+SOLANA_RPC_URL=https://api.devnet.solana.com
 ```
 
 ---
@@ -276,9 +291,11 @@ Set `RECUR_API_SECRET` in Vercel environment variables before deploying.
 - [x] Live proxy with OpenAI, Anthropic, Groq, OpenRouter, Mistral, and Gemini support
 - [x] Real-time threat dashboard
 - [x] Solana staking program (devnet)
+- [x] On-chain threat attestation program (devnet)
+- [x] API key signup with SHA-256 hashed storage
+- [x] Per-key rate limiting (60 req/min)
+- [x] Fail-closed detection (blocks when sentinel is unreachable)
 - [ ] Vercel KV / Upstash Redis for persistent event storage
-- [ ] Solana on-chain attestation of threat events
 - [ ] Sentinel mutation — detection models update from observed attacks
 - [ ] Canary token injection and monitoring
-- [ ] Rate limiting and abuse detection
-- [ ] Mainnet staking launch
+- [ ] Mainnet staking + attestation launch
