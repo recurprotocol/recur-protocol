@@ -1274,7 +1274,8 @@ function Docs({setPage}) {
             <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.85,marginBottom:16}}>
               <strong style={{color:"var(--text-primary)"}}>2.</strong> Replace your provider endpoint with the RECUR proxy:
             </p>
-            <Code>{`fetch("https://recur-protocol.com/api/proxy", {
+            <Code>{`// Supported providers: openai, anthropic, gemini, groq, openrouter, mistral
+fetch("https://recur-protocol.com/api/proxy", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -1297,7 +1298,8 @@ function Docs({setPage}) {
             <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.85,marginBottom:20}}>
               The provider is specified per-request via <code style={{color:"var(--accent)"}}>x-recur-provider</code>. Your integration never changes — only the header value does.
             </p>
-            <Code>{`const headers = {
+            <Code>{`const PROXY = "https://recur-protocol.com/api/proxy";
+const headers = {
   "Content-Type": "application/json",
   "x-recur-api-key": RECUR_KEY,  // always the same
 };
@@ -1316,7 +1318,7 @@ await fetch(PROXY, {
   body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1024, messages })
 });
 
-// Gemini (auto-translated from OpenAI format)
+// Gemini (send OpenAI-format messages — auto-translated)
 await fetch(PROXY, {
   method: "POST",
   headers: { ...headers, "x-recur-provider": "gemini", "x-recur-target-key": GEMINI_KEY },
@@ -1378,10 +1380,12 @@ await fetch(PROXY, {
                 ["401",'{"error":"x-recur-api-key header required"}',"Missing API key header"],
                 ["401",'{"error":"Invalid API key"}',"Key not found in database or malformed"],
                 ["401",'{"error":"API key has been deactivated"}',"Key exists but was disabled by admin"],
+                ["401",'{"error":"Authentication service unavailable"}',"Supabase unreachable — request rejected (fail-closed)"],
                 ["400",'{"error":"x-recur-provider header required..."}',"Missing or unsupported provider value"],
                 ["400",'{"error":"x-recur-target-key header required"}',"Missing provider API key"],
+                ["429",'{"error":"Rate limit exceeded..."}',"Max 60 requests per minute per API key"],
                 ["200",'{"recur":{"status":"BLOCKED",...}}',"Threat detected — request blocked before reaching provider"],
-                ["500",'{"error":"Internal sentinel error"}',"Proxy error — check message field for details"],
+                ["500",'{"error":"Internal sentinel error"}',"Proxy error — no details exposed for security"],
               ]}
             />
             <p style={{fontSize:10,color:"var(--text-secondary)",lineHeight:1.8,marginTop:8}}>
