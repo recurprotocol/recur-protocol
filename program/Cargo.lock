@@ -1190,6 +1190,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "recur-attestation"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+]
+
+[[package]]
 name = "recur-staking"
 version = "0.1.0"
 dependencies = [

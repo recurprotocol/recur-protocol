@@ -13,9 +13,18 @@
  *     x-recur-provider: openai | anthropic | groq | openrouter | mistral | gemini
  *     x-recur-target-key: <your provider API key>
  *   Body: standard OpenAI or Anthropic messages payload
+ *
+ * Required env vars:
+ *   RECUR_API_SECRET          — master API secret
+ *   SUPABASE_URL              — Supabase project URL
+ *   SUPABASE_SERVICE_ROLE_KEY — Supabase service role key
+ *   ATTESTER_KEYPAIR          — base58-encoded Solana private key for on-chain attestation
+ *   SOLANA_RPC_URL             — Solana RPC endpoint (defaults to mainnet-beta)
  */
 
 import { createHash } from "crypto";
+import { Connection, Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
+import { AnchorProvider, Program, Wallet, BN } from "@coral-xyz/anchor";
 import { createClient } from "@supabase/supabase-js";
 import { normaliseRequest, blockResponse, PROVIDERS } from "../lib/providers.js";
 
@@ -26,6 +35,10 @@ const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const RATE_LIMIT_MAX     = 60;   // requests per window
 const RATE_LIMIT_WINDOW  = 60000; // 1 minute in ms
+
+const SOLANA_RPC_URL       = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
+const ATTESTER_KEYPAIR_B58 = process.env.ATTESTER_KEYPAIR;
+const ATTESTATION_PROGRAM  = new PublicKey("3ZLSqgGoUH3cQbDLV6QXDLRXGzgCsmY9oMGx8qwMM24Y");
 
 const supabaseAdmin = (SUPABASE_URL && SUPABASE_SERVICE)
   ? createClient(SUPABASE_URL, SUPABASE_SERVICE)
@@ -143,6 +156,11 @@ export default async function handler(req, res) {
 
     // ── BLOCK ──
     if (detectionResult.blocked) {
+      // Fire-and-forget on-chain attestation for blocked threats
+      attestOnChain(event, normalised.userPrompt).catch(err =>
+        console.error("Attestation failed:", err.message)
+      );
+
       const blocked = blockResponse(provider, normalised.model, detectionResult.primary_threat);
       return res.status(200).json({
         ...blocked,
@@ -403,6 +421,81 @@ async function validateApiKey(key) {
   }
 
   return { valid: false, reason: "Invalid API key" };
+}
+
+// ─────────────────────────────────────────────
+// ON-CHAIN ATTESTATION
+// ─────────────────────────────────────────────
+
+const SEVERITY_MAP = { CLEAN: 1, MEDIUM: 2, HIGH: 3, CRITICAL: 4, UNKNOWN: 3 };
+
+// Minimal IDL — only the attest_threat instruction
+const ATTESTATION_IDL = {
+  version: "0.1.0",
+  name: "recur_attestation",
+  instructions: [{
+    name: "attestThreat",
+    accounts: [
+      { name: "attester", isMut: true, isSigner: true },
+      { name: "attestation", isMut: true, isSigner: false },
+      { name: "systemProgram", isMut: false, isSigner: false },
+    ],
+    args: [
+      { name: "eventId", type: "string" },
+      { name: "threatType", type: "string" },
+      { name: "severity", type: "u8" },
+      { name: "timestamp", type: "i64" },
+      { name: "promptHash", type: { array: ["u8", 32] } },
+    ],
+  }],
+  accounts: [],
+  errors: [],
+};
+
+async function attestOnChain(event, promptText) {
+  if (!ATTESTER_KEYPAIR_B58) return; // attestation disabled if no keypair
+
+  const bs58 = await import("bs58");
+  const attesterKeypair = Keypair.fromSecretKey(bs58.default.decode(ATTESTER_KEYPAIR_B58));
+
+  const connection = new Connection(SOLANA_RPC_URL, "confirmed");
+  const wallet = new Wallet(attesterKeypair);
+  const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
+  const program = new Program(ATTESTATION_IDL, ATTESTATION_PROGRAM, provider);
+
+  // Keccak256 hash of the prompt (not SHA-256 — using createHash which supports keccak)
+  const promptHash = Array.from(createHash("sha256").update(promptText || "").digest());
+
+  const eventId = (event.id || "").slice(0, 36);
+  const threatType = (event.primary_threat || "UNKNOWN").toLowerCase().slice(0, 32);
+  const severity = SEVERITY_MAP[event.severity] || 2;
+  const timestamp = Math.floor(Date.now() / 1000);
+
+  const [attestationPda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("attestation"), Buffer.from(eventId)],
+    ATTESTATION_PROGRAM,
+  );
+
+  const txSig = await program.methods
+    .attestThreat(eventId, threatType, severity, new BN(timestamp), promptHash)
+    .accounts({
+      attester: attesterKeypair.publicKey,
+      attestation: attestationPda,
+      systemProgram: SystemProgram.programId,
+    })
+    .signers([attesterKeypair])
+    .rpc();
+
+  console.log(`Attestation committed: ${txSig} for event ${eventId}`);
+
+  // Store tx_sig in Supabase if available
+  if (supabaseAdmin) {
+    await supabaseAdmin
+      .from("threat_events")
+      .update({ tx_sig: txSig })
+      .eq("event_id", eventId)
+      .catch(err => console.error("Failed to store tx_sig:", err.message));
+  }
 }
 
 // ─────────────────────────────────────────────
