@@ -629,7 +629,7 @@ function Landing({setPage}) {
     {icon:"03",title:"Jailbreak Immunisation",         desc:"DAN variants, persona manipulation, developer mode exploits and boundary probing detected across five attack categories with continuously updated signatures."},
     {icon:"04",title:"Self-Evolving Sentinels",         desc:"Novel attack vectors trigger sentinel mutation and sub-agent spawning. The network gets stronger with every attack it encounters — no manual updates required."},
     {icon:"05",title:"On-Chain Attestation",            desc:"Security events committed to Solana as ZK proofs. Verifiable, immutable records of your AI deployment's security posture — without exposing prompt data."},
-    {icon:"06",title:"Two-Minute Integration",          desc:"Replace your OpenAI or Anthropic endpoint with RECUR's proxy. Pass your provider key in a header. No SDK, no code changes to your application logic."},
+    {icon:"06",title:"Two-Minute Integration",          desc:"Replace your OpenAI, Anthropic, Gemini, Groq, OpenRouter or Mistral endpoint with RECUR's proxy. Pass your provider key in a header. No SDK, no code changes to your application logic."},
   ];
 
   const code = `// Before — direct to OpenAI
@@ -667,8 +667,15 @@ fetch("https://recur-protocol.com/api/proxy", {
         </p>
         <p className="hero-sub" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-secondary)",maxWidth:440,
           lineHeight:1.8,marginBottom:52,letterSpacing:1,animation:"fade-up 0.7s ease 0.3s both",opacity:0}}>
-          Built for Solana · OpenAI &amp; Anthropic compatible · Immutable on-chain proofs
+          Works with OpenAI, Anthropic, Gemini, Groq, OpenRouter and Mistral — drop-in with no code changes
         </p>
+        <div className="cta-row" style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center",
+          animation:"fade-up 0.7s ease 0.35s both",opacity:0,marginBottom:32}}>
+          {["OpenAI","Anthropic","Gemini","Groq","OpenRouter","Mistral"].map(p=>(
+            <span key={p} style={{fontSize:10,fontFamily:"'JetBrains Mono',monospace",letterSpacing:1,
+              padding:"4px 12px",border:"1px solid var(--border)",borderRadius:20,color:"var(--text-secondary)"}}>{p}</span>
+          ))}
+        </div>
         <div className="cta-row" style={{display:"flex",gap:14,flexWrap:"wrap",justifyContent:"center",
           animation:"fade-up 0.7s ease 0.4s both",opacity:0}}>
           <button onClick={()=>setPage("get-access")} style={{
@@ -720,7 +727,7 @@ fetch("https://recur-protocol.com/api/proxy", {
         </h2>
         <div className="grid-3" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:2,background:"var(--border)"}}>
           {[
-            {n:"01",t:"INTERCEPT",d:"RECUR sits between your application and your AI provider. Every prompt routes through the sentinel network before reaching OpenAI or Anthropic."},
+            {n:"01",t:"INTERCEPT",d:"RECUR sits between your application and your AI provider. Every prompt routes through the sentinel network before reaching OpenAI, Anthropic, Gemini, Groq, OpenRouter or Mistral."},
             {n:"02",t:"ANALYSE",  d:"Five attack categories, 40+ signatures, behavioural heuristics. Each prompt is classified in under 5ms by the active sentinel layer."},
             {n:"03",t:"ATTEST",   d:"Blocked threats are committed to Solana as ZK proofs — immutable, verifiable security records without exposing sensitive prompt data."},
           ].map((s,i)=>(
@@ -771,7 +778,7 @@ fetch("https://recur-protocol.com/api/proxy", {
             color:"var(--text-primary)",lineHeight:1.9,overflowX:"auto",background:"transparent"}}>{code}</pre>
           <div style={{padding:"12px 32px 16px",borderTop:"1px solid var(--border-muted)",
             fontSize:10,color:"var(--text-secondary)",letterSpacing:1,lineHeight:1.8}}>
-            No wallet required. No token required. Drop-in replacement for your existing OpenAI or Anthropic endpoint.
+            No wallet required. No token required. Drop-in replacement for your existing OpenAI, Anthropic, Gemini, Groq, OpenRouter or Mistral endpoint.
           </div>
         </Panel>
       </section>
