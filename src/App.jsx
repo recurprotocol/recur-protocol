@@ -298,16 +298,6 @@ function Nav({page, setPage, apiOnline}) {
       onMouseEnter={e=>{e.target.style.background="var(--accent-hover)"}}
       onMouseLeave={e=>{e.target.style.background="var(--accent)"}}>GET ACCESS</button>
 
-      {page==="landing" && (
-        <button onClick={()=>setPage("dashboard")} style={{
-          fontFamily:"'JetBrains Mono',monospace",fontSize:13,letterSpacing:3,
-          padding:"5px 16px",flexShrink:0,
-          background:"transparent",color:"var(--text-primary)",
-          border:"1px solid var(--border)",borderRadius:6,cursor:"pointer",transition:"all 0.2s",
-        }}
-        onMouseEnter={e=>{e.target.style.borderColor="var(--text-secondary)"}}
-        onMouseLeave={e=>{e.target.style.borderColor="var(--border)"}}>VIEW DASHBOARD →</button>
-      )}
       </div>
 
       {/* Mobile dropdown menu */}
@@ -681,13 +671,13 @@ fetch("https://recur-protocol.com/api/proxy", {
         </p>
         <div className="cta-row" style={{display:"flex",gap:14,flexWrap:"wrap",justifyContent:"center",
           animation:"fade-up 0.7s ease 0.4s both",opacity:0}}>
-          <button onClick={()=>setPage("dashboard")} style={{
+          <button onClick={()=>setPage("get-access")} style={{
             fontFamily:"'JetBrains Mono',monospace",fontSize:15,letterSpacing:4,
             padding:"14px 44px",background:"var(--accent)",color:"#fff",
             border:"1px solid var(--accent)",borderRadius:6,cursor:"pointer",transition:"all 0.25s"}}
             onMouseEnter={e=>{e.target.style.background="var(--accent-hover)"}}
             onMouseLeave={e=>{e.target.style.background="var(--accent)"}}>
-            VIEW LIVE DASHBOARD
+            GET ACCESS
           </button>
           <a href="https://github.com/recurprotocol/recur-protocol" target="_blank" rel="noreferrer" style={{
             fontFamily:"'JetBrains Mono',monospace",fontSize:15,letterSpacing:4,padding:"14px 44px",
@@ -799,14 +789,6 @@ fetch("https://recur-protocol.com/api/proxy", {
             <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.9,marginBottom:28}}>
               RECUR-PRIME orchestrates the WARD layer. WARD sentinels own attack categories. SUB sentinels target specific techniques. NANO sentinels handle high-frequency signatures at scale.
             </p>
-            <button onClick={()=>setPage("dashboard")} style={{
-              fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:2,
-              padding:"10px 22px",background:"transparent",color:"var(--text-primary)",
-              border:"1px solid var(--border)",borderRadius:6,cursor:"pointer",transition:"all 0.2s"}}
-              onMouseEnter={e=>{e.target.style.borderColor="var(--text-secondary)"}}
-              onMouseLeave={e=>{e.target.style.borderColor="var(--border)"}}>
-              VIEW LIVE SENTINEL NETWORK →
-            </button>
           </div>
           <Panel style={{padding:"16px"}}>
             {SENTINEL_TREE.slice(0,8).map(s=>{
@@ -831,13 +813,13 @@ fetch("https://recur-protocol.com/api/proxy", {
 
       <section style={{borderTop:"1px solid var(--border)",padding:"80px 64px",
         textAlign:"center",background:"var(--surface)"}}>
-        <button onClick={()=>setPage("dashboard")} style={{
+        <button onClick={()=>setPage("get-access")} style={{
           fontFamily:"'JetBrains Mono',monospace",fontSize:18,letterSpacing:6,
           padding:"18px 68px",background:"var(--accent)",color:"#fff",
           border:"1px solid var(--accent)",borderRadius:6,cursor:"pointer",transition:"all 0.3s"}}
           onMouseEnter={e=>{e.target.style.background="var(--accent-hover)"}}
           onMouseLeave={e=>{e.target.style.background="var(--accent)"}}>
-          OPEN LIVE DASHBOARD
+          GET ACCESS
         </button>
       </section>
 
