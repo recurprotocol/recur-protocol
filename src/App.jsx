@@ -1978,6 +1978,7 @@ export default function App() {
     document.body.style.overflow = page==="dashboard"?"hidden":"auto";
     document.body.style.height   = page==="dashboard"?"100vh":"auto";
     window.scrollTo(0,0);
+    if (window.location.hash) history.replaceState(null, "", window.location.pathname);
   },[page]);
 
   return (
