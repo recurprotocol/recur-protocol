@@ -173,6 +173,7 @@ const StatusDot = ({status}) => {
 /* ── NAV ── */
 function Nav({page, setPage, apiOnline}) {
   const [dropOpen, setDropOpen] = useState(false);
+  const [docsDropOpen, setDocsDropOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -198,14 +199,79 @@ function Nav({page, setPage, apiOnline}) {
           transition:"all 0.2s",
         }}>HOME</button>
 
-        <button onClick={()=>setPage("docs")} style={{
-          fontFamily:"'JetBrains Mono',monospace",fontSize:10,padding:"5px 14px",
-          cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
-          background:"transparent",
-          color:page==="docs"?"var(--text-primary)":"var(--text-secondary)",
-          borderBottom:page==="docs"?"2px solid var(--accent)":"2px solid transparent",
-          transition:"all 0.2s",
-        }}>DOCS</button>
+        <div style={{position:"relative"}}
+          onMouseEnter={()=>setDocsDropOpen(true)}
+          onMouseLeave={()=>setDocsDropOpen(false)}>
+          <button onClick={()=>setPage("docs")} style={{
+            fontFamily:"'JetBrains Mono',monospace",fontSize:10,padding:"5px 14px",
+            cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
+            background:"transparent",
+            color:(page==="docs"||page==="docs-providers"||page==="docs-agents"||docsDropOpen)?"var(--text-primary)":"var(--text-secondary)",
+            borderBottom:(page==="docs"||page==="docs-providers"||page==="docs-agents"||docsDropOpen)?"2px solid var(--accent)":"2px solid transparent",
+            transition:"all 0.2s",display:"flex",alignItems:"center",gap:6,
+          }}>
+            DOCS <span style={{fontSize:8,opacity:0.6}}>{docsDropOpen?"▲":"▼"}</span>
+          </button>
+
+          {docsDropOpen && (
+            <div style={{
+              position:"absolute",top:"100%",left:0,
+              background:"var(--surface)",border:"1px solid var(--border)",borderTop:"none",
+              minWidth:260,borderRadius:"0 0 6px 6px",zIndex:2000,
+            }}>
+              <div onClick={()=>{setPage("docs");setDocsDropOpen(false);}} style={{
+                padding:"12px 16px",cursor:"pointer",borderBottom:"1px solid var(--border-muted)",
+                transition:"background 0.15s",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>QUICK START</div>
+                <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>Get up and running in 2 minutes</div>
+              </div>
+              <div onClick={()=>{setPage("docs");setDocsDropOpen(false);setTimeout(()=>document.getElementById("provider-switching")?.scrollIntoView({behavior:"smooth"}),100);}} style={{
+                padding:"12px 16px",cursor:"pointer",borderBottom:"1px solid var(--border-muted)",
+                transition:"background 0.15s",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>PROVIDER SWITCHING</div>
+                <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>One key, any provider</div>
+              </div>
+              <div onClick={()=>{setPage("docs-providers");setDocsDropOpen(false);}} style={{
+                padding:"12px 16px",cursor:"pointer",borderBottom:"1px solid var(--border-muted)",
+                transition:"background 0.15s",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>LLM PROVIDERS</div>
+                <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>OpenAI, Anthropic, Gemini + 3 more</div>
+              </div>
+              <div onClick={()=>{setPage("docs-agents");setDocsDropOpen(false);}} style={{
+                padding:"12px 16px",cursor:"pointer",borderBottom:"1px solid var(--border-muted)",
+                display:"flex",justifyContent:"space-between",alignItems:"center",
+                transition:"background 0.15s",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>AGENT INTEGRATIONS</div>
+                  <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>OpenClaw and more</div>
+                </div>
+                <span style={{fontSize:8,color:"var(--accent)",padding:"2px 6px",
+                  background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:3}}>NEW</span>
+              </div>
+              <div onClick={()=>{setPage("docs");setDocsDropOpen(false);setTimeout(()=>document.getElementById("error-codes")?.scrollIntoView({behavior:"smooth"}),100);}} style={{
+                padding:"12px 16px",cursor:"pointer",
+                transition:"background 0.15s",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>ERROR CODES</div>
+                <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>HTTP status codes and responses</div>
+              </div>
+            </div>
+          )}
+        </div>
 
         <button onClick={()=>setPage("blog")} style={{
           fontFamily:"'JetBrains Mono',monospace",fontSize:10,padding:"5px 14px",
@@ -270,22 +336,6 @@ function Nav({page, setPage, apiOnline}) {
                 </div>
                 <span style={{fontSize:9,color:"var(--accent)",letterSpacing:1,padding:"2px 6px",
                   background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:4}}>LIVE</span>
-              </div>
-
-              <div onClick={()=>{setPage("docs-agents");setDropOpen(false);}} style={{
-                padding:"12px 16px",cursor:"pointer",
-                borderBottom:"1px solid var(--border-muted)",
-                display:"flex",justifyContent:"space-between",alignItems:"center",
-                transition:"background 0.15s",
-              }}
-              onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <div>
-                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>AGENT INTEGRATIONS</div>
-                  <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>Protect OpenClaw and other AI agents</div>
-                </div>
-                <span style={{fontSize:9,color:"var(--accent)",letterSpacing:1,padding:"2px 6px",
-                  background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:4}}>NEW</span>
               </div>
 
               <div style={{
