@@ -1415,7 +1415,7 @@ await fetch(PROXY, {
 }
 
 /* ── BLOG ── */
-function Blog({setPage}) {
+function Blog({setPage, activeSlug}) {
   const posts = [
     {
       slug: "prompt-injection-attacks-2026",
@@ -1579,15 +1579,13 @@ The developers who take LLM security seriously now will be the ones who avoid th
     },
   ];
 
-  const [activePost, setActivePost] = useState(null);
-
-  if (activePost) {
-    const post = posts.find(p => p.slug === activePost);
-    if (!post) { setActivePost(null); return null; }
+  if (activeSlug) {
+    const post = posts.find(p => p.slug === activeSlug);
+    if (!post) { setPage("blog"); return null; }
     return (
       <div style={{position:"relative",zIndex:1,minHeight:"100vh",paddingTop:54}}>
         <article className="section-pad" style={{padding:"48px 64px",maxWidth:800,margin:"0 auto"}}>
-          <button onClick={()=>setActivePost(null)} style={{
+          <button onClick={()=>setPage("blog")} style={{
             fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:2,
             padding:"6px 14px",background:"transparent",color:"var(--text-secondary)",
             border:"1px solid var(--border)",borderRadius:6,cursor:"pointer",marginBottom:32,
@@ -1636,7 +1634,7 @@ The developers who take LLM security seriously now will be the ones who avoid th
         ) : (
           <div className="grid-2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
             {posts.map(post => (
-              <Panel key={post.slug} onClick={()=>setActivePost(post.slug)}
+              <Panel key={post.slug} onClick={()=>setPage("blog",post.slug)}
                 style={{padding:"28px 24px",cursor:"pointer",transition:"border-color 0.2s"}}
                 >
                 <div style={{fontSize:10,color:"var(--text-muted)",letterSpacing:2,marginBottom:8}}>{post.date}</div>
@@ -1927,9 +1925,35 @@ function GetAccess({setPage}) {
   );
 }
 
+/* ── URL ROUTING ── */
+const ROUTE_MAP = {
+  "/": "landing",
+  "/staking": "staking",
+  "/get-access": "get-access",
+  "/use-cases": "use-cases",
+  "/docs": "docs",
+  "/blog": "blog",
+  "/dashboard": "dashboard",
+};
+
+const PAGE_TO_PATH = Object.fromEntries(
+  Object.entries(ROUTE_MAP).map(([k, v]) => [v, k])
+);
+
+function parseUrl() {
+  const path = window.location.pathname;
+  // Blog post: /blog/slug
+  if (path.startsWith("/blog/") && path.length > 6) {
+    return { page: "blog", blogSlug: path.slice(6) };
+  }
+  return { page: ROUTE_MAP[path] || "landing", blogSlug: null };
+}
+
 /* ── ROOT ── */
 export default function App() {
-  const [page,         setPage]         = useState("landing");
+  const initial = parseUrl();
+  const [page,         setPageRaw]      = useState(initial.page);
+  const [blogSlug,     setBlogSlug]     = useState(initial.blogSlug);
   const [threats,      setThreats]      = useState([]);
   const [attestations, setAttestations] = useState([]);
   const [stats,        setStats]        = useState(null);
@@ -1938,6 +1962,26 @@ export default function App() {
   const [alertActive,  setAlertActive]  = useState(false);
   const [apiOnline,    setApiOnline]    = useState(false);
 
+  const setPage = (newPage, slug) => {
+    setPageRaw(newPage);
+    if (newPage === "blog" && slug) {
+      setBlogSlug(slug);
+      history.pushState(null, "", `/blog/${slug}`);
+    } else {
+      setBlogSlug(null);
+      history.pushState(null, "", PAGE_TO_PATH[newPage] || "/");
+    }
+  };
+
+  useEffect(() => {
+    const onPop = () => {
+      const { page: p, blogSlug: s } = parseUrl();
+      setPageRaw(p);
+      setBlogSlug(s);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   useEffect(()=>{
     const poll = async()=>{
@@ -1978,7 +2022,6 @@ export default function App() {
     document.body.style.overflow = page==="dashboard"?"hidden":"auto";
     document.body.style.height   = page==="dashboard"?"100vh":"auto";
     window.scrollTo(0,0);
-    if (window.location.hash) history.replaceState(null, "", window.location.pathname);
   },[page]);
 
   return (
@@ -1991,7 +2034,7 @@ export default function App() {
       {page==="get-access" && <GetAccess setPage={setPage}/>}
       {page==="use-cases"  && <UseCases setPage={setPage}/>}
       {page==="docs"       && <Docs setPage={setPage}/>}
-      {page==="blog"       && <Blog setPage={setPage}/>}
+      {page==="blog"       && <Blog setPage={setPage} activeSlug={blogSlug}/>}
       {page==="dashboard" && (
         <Dashboard
           threats={threats}           setThreats={setThreats}
