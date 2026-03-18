@@ -246,19 +246,17 @@ function Nav({page, setPage, apiOnline}) {
                 <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>LLM PROVIDERS</div>
                 <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>OpenAI, Anthropic, Gemini + 3 more</div>
               </div>
-              <div onClick={()=>{setPage("docs-agents");setDocsDropOpen(false);}} style={{
-                padding:"12px 16px",cursor:"pointer",borderBottom:"1px solid var(--border-muted)",
+              <div style={{
+                padding:"12px 16px",borderBottom:"1px solid var(--border-muted)",
                 display:"flex",justifyContent:"space-between",alignItems:"center",
-                transition:"background 0.15s",
-              }}
-              onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                opacity:0.5,cursor:"default",
+              }}>
                 <div>
                   <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>AGENT INTEGRATIONS</div>
                   <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>OpenClaw and more</div>
                 </div>
-                <span style={{fontSize:8,color:"var(--accent)",padding:"2px 6px",
-                  background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:3}}>NEW</span>
+                <span style={{fontSize:8,color:"var(--warning)",padding:"2px 6px",
+                  background:"rgba(210,153,34,0.12)",border:"1px solid rgba(210,153,34,0.4)",borderRadius:3}}>SOON</span>
               </div>
               <div onClick={()=>{setPage("docs");setDocsDropOpen(false);setTimeout(()=>document.getElementById("error-codes")?.scrollIntoView({behavior:"smooth"}),100);}} style={{
                 padding:"12px 16px",cursor:"pointer",
@@ -1316,7 +1314,7 @@ function Docs({setPage}) {
     {id:"provider-switching",label:"Provider Switching"},
     {id:"request-headers",label:"Request Headers"},
     {id:"supported-providers",label:"Supported Providers",link:"docs-providers"},
-    {id:"agent-integrations",label:"Agent Integrations",link:"docs-agents",badge:"NEW"},
+    {id:"agent-integrations",label:"Agent Integrations",disabled:true,badge:"SOON"},
     {id:"error-codes",label:"Error Codes"},
   ];
 
@@ -1328,15 +1326,19 @@ function Docs({setPage}) {
         <nav className="docs-sidebar" style={{position:"sticky",top:110,alignSelf:"start"}}>
           <div style={{fontSize:9,letterSpacing:6,color:"var(--text-secondary)",marginBottom:16}}>CONTENTS</div>
           {toc.map(t=>(
-            <div key={t.id} onClick={()=>t.link ? setPage(t.link) : document.getElementById(t.id)?.scrollIntoView({behavior:"smooth"})}
-              style={{display:"flex",alignItems:"center",gap:6,fontSize:10,color:"var(--text-secondary)",cursor:"pointer",
+            <div key={t.id} onClick={()=>t.disabled ? null : t.link ? setPage(t.link) : document.getElementById(t.id)?.scrollIntoView({behavior:"smooth"})}
+              style={{display:"flex",alignItems:"center",gap:6,fontSize:10,
+              color:t.disabled?"var(--text-muted)":"var(--text-secondary)",
+              cursor:t.disabled?"default":"pointer",opacity:t.disabled?0.5:1,
               letterSpacing:1,padding:"6px 0",transition:"color 0.15s",
               borderLeft:"2px solid var(--border)",paddingLeft:12,marginBottom:2}}
-              onMouseEnter={e=>e.currentTarget.style.color="var(--text-primary)"}
-              onMouseLeave={e=>e.currentTarget.style.color="var(--text-secondary)"}>
+              onMouseEnter={e=>{if(!t.disabled)e.currentTarget.style.color="var(--text-primary)"}}
+              onMouseLeave={e=>{if(!t.disabled)e.currentTarget.style.color="var(--text-secondary)"}}>
               {t.label}
-              {t.badge&&<span style={{fontSize:8,color:"var(--accent)",padding:"1px 5px",
-                background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:3,letterSpacing:1}}>{t.badge}</span>}
+              {t.badge&&<span style={{fontSize:8,padding:"1px 5px",borderRadius:3,letterSpacing:1,
+                color:t.badge==="SOON"?"var(--warning)":"var(--accent)",
+                background:t.badge==="SOON"?"rgba(210,153,34,0.12)":"rgba(35,134,54,0.15)",
+                border:t.badge==="SOON"?"1px solid rgba(210,153,34,0.4)":"1px solid rgba(35,134,54,0.4)"}}>{t.badge}</span>}
             </div>
           ))}
           <div style={{borderTop:"1px solid var(--border)",marginTop:16,paddingTop:16}}>
@@ -1404,17 +1406,15 @@ fetch("https://recur-protocol.com/api/proxy", {
               <div style={{fontSize:10,color:"var(--text-secondary)",lineHeight:1.7,marginBottom:8}}>OpenAI, Anthropic, Gemini + 3 more</div>
               <div style={{fontSize:9,color:"var(--accent)",letterSpacing:1}}>View all →</div>
             </div>
-            <div onClick={()=>setPage("docs-agents")} style={{background:"var(--surface)",border:"1px solid var(--border)",
-              borderRadius:6,padding:"20px",cursor:"pointer",transition:"border-color 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}
-              onMouseEnter={e=>e.currentTarget.style.borderColor="var(--text-muted)"}
-              onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
+            <div style={{background:"var(--surface)",border:"1px solid var(--border-muted)",
+              borderRadius:6,padding:"20px",opacity:0.5,cursor:"default",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,letterSpacing:2,color:"var(--text-primary)"}}>AGENT INTEGRATIONS</span>
-                <span style={{fontSize:8,color:"var(--accent)",padding:"1px 5px",
-                  background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:3}}>NEW</span>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,letterSpacing:2,color:"var(--text-muted)"}}>AGENT INTEGRATIONS</span>
+                <span style={{fontSize:8,color:"var(--warning)",padding:"1px 5px",
+                  background:"rgba(210,153,34,0.12)",border:"1px solid rgba(210,153,34,0.4)",borderRadius:3}}>SOON</span>
               </div>
-              <div style={{fontSize:10,color:"var(--text-secondary)",lineHeight:1.7,marginBottom:8}}>OpenClaw and more</div>
-              <div style={{fontSize:9,color:"var(--accent)",letterSpacing:1}}>View all →</div>
+              <div style={{fontSize:10,color:"var(--text-muted)",lineHeight:1.7,marginBottom:8}}>OpenClaw and more</div>
+              <div style={{fontSize:9,color:"var(--text-muted)",letterSpacing:1}}>Coming soon</div>
             </div>
           </div>
 
@@ -2333,7 +2333,6 @@ const ROUTE_MAP = {
   "/use-cases": "use-cases",
   "/docs": "docs",
   "/docs/providers": "docs-providers",
-  "/docs/agents": "docs-agents",
   "/blog": "blog",
   "/dashboard": "dashboard",
 };
@@ -2440,7 +2439,6 @@ export default function App() {
       {page==="use-cases"  && <UseCases setPage={setPage}/>}
       {page==="docs"       && <Docs setPage={setPage}/>}
       {page==="docs-providers" && <DocProviders setPage={setPage}/>}
-      {page==="docs-agents" && <DocAgents setPage={setPage}/>}
       {page==="blog"       && <Blog setPage={setPage} activeSlug={blogSlug}/>}
       {page==="dashboard" && (
         <Dashboard
