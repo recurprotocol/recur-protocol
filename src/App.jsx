@@ -1246,11 +1246,12 @@ function Docs({setPage}) {
         <nav className="docs-sidebar" style={{position:"sticky",top:110,alignSelf:"start"}}>
           <div style={{fontSize:9,letterSpacing:6,color:"var(--text-secondary)",marginBottom:16}}>CONTENTS</div>
           {toc.map(t=>(
-            <a key={t.id} href={`#${t.id}`} style={{display:"block",fontSize:10,color:"var(--text-secondary)",
-              letterSpacing:1,padding:"6px 0",textDecoration:"none",transition:"color 0.15s",
+            <div key={t.id} onClick={()=>document.getElementById(t.id)?.scrollIntoView({behavior:"smooth"})}
+              style={{display:"block",fontSize:10,color:"var(--text-secondary)",cursor:"pointer",
+              letterSpacing:1,padding:"6px 0",transition:"color 0.15s",
               borderLeft:"2px solid var(--border)",paddingLeft:12,marginBottom:2}}
-              onMouseEnter={e=>e.target.style.color="var(--text-primary)"}
-              onMouseLeave={e=>e.target.style.color="var(--text-secondary)"}>{t.label}</a>
+              onMouseEnter={e=>e.currentTarget.style.color="var(--text-primary)"}
+              onMouseLeave={e=>e.currentTarget.style.color="var(--text-secondary)"}>{t.label}</div>
           ))}
           <div style={{borderTop:"1px solid var(--border)",marginTop:16,paddingTop:16}}>
             <button onClick={()=>setPage("get-access")} style={{
