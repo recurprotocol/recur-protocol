@@ -272,22 +272,6 @@ function Nav({page, setPage, apiOnline}) {
                   background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:4}}>LIVE</span>
               </div>
 
-              <div onClick={()=>{setPage("openclaw");setDropOpen(false);}} style={{
-                padding:"12px 16px",cursor:"pointer",
-                borderBottom:"1px solid var(--border-muted)",
-                display:"flex",justifyContent:"space-between",alignItems:"center",
-                transition:"background 0.15s",
-              }}
-              onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
-              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <div>
-                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>OPENCLAW INTEGRATION</div>
-                  <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>Secure your autonomous agent from prompt injection</div>
-                </div>
-                <span style={{fontSize:9,color:"var(--accent)",letterSpacing:1,padding:"2px 6px",
-                  background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:4}}>NEW</span>
-              </div>
-
               <div style={{
                 padding:"12px 16px",
                 display:"flex",justifyContent:"space-between",alignItems:"center",
@@ -377,12 +361,6 @@ function Nav({page, setPage, apiOnline}) {
             background:"transparent",color:page==="staking"?"var(--text-primary)":"var(--text-secondary)",
             textAlign:"left",
           }}>STAKING</button>
-          <button onClick={()=>{setPage("openclaw");setMobileMenuOpen(false);}} style={{
-            fontFamily:"'JetBrains Mono',monospace",fontSize:11,padding:"12px 32px",
-            cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
-            background:"transparent",color:page==="openclaw"?"var(--text-primary)":"var(--text-secondary)",
-            textAlign:"left",
-          }}>OPENCLAW</button>
           <button onClick={()=>{setPage("get-access");setMobileMenuOpen(false);}} style={{
             fontFamily:"'JetBrains Mono',monospace",fontSize:11,padding:"12px 32px",
             cursor:"pointer",letterSpacing:2,border:"none",outline:"none",
@@ -682,7 +660,6 @@ function Landing({setPage}) {
     {icon:"04",title:"Self-Evolving Sentinels",         desc:"Novel attack vectors trigger sentinel mutation and sub-agent spawning. The network gets stronger with every attack it encounters — no manual updates required."},
     {icon:"05",title:"On-Chain Attestation",            desc:"Security events committed to Solana as ZK proofs. Verifiable, immutable records of your AI deployment's security posture — without exposing prompt data."},
     {icon:"06",title:"Two-Minute Integration",          desc:"Replace your OpenAI, Anthropic, Gemini, Groq, OpenRouter or Mistral endpoint with RECUR's proxy. Pass your provider key in a header. No SDK, no code changes to your application logic."},
-    {icon:"07",title:"OpenClaw Integration", desc:"Stop prompt injection attacks targeting your autonomous OpenClaw agent before they reach your LLM. Drop-in setup, no code changes."},
   ];
 
   const code = `// Before — direct to OpenAI
@@ -1274,7 +1251,6 @@ function Docs({setPage}) {
     {id:"request-headers",label:"Request Headers"},
     {id:"supported-providers",label:"Supported Providers"},
     {id:"error-codes",label:"Error Codes"},
-    {id:"openclaw",label:"OpenClaw Integration"},
   ];
 
   return (
@@ -1448,208 +1424,7 @@ await fetch(PROXY, {
             </p>
           </Section>
 
-          <Section id="openclaw" title="OPENCLAW INTEGRATION">
-            <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.85}}>
-              RECUR provides a dedicated integration guide for securing OpenClaw autonomous agents.
-            </p>
-            <button onClick={()=>setPage("openclaw")} style={{
-              fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:2,
-              padding:"8px 16px",background:"var(--accent)",color:"#fff",
-              border:"1px solid var(--accent)",borderRadius:6,cursor:"pointer",marginTop:12,
-              transition:"all 0.2s"}}
-              onMouseEnter={e=>{e.target.style.background="var(--accent-hover)"}}
-              onMouseLeave={e=>{e.target.style.background="var(--accent)"}}>
-              VIEW OPENCLAW SETUP GUIDE →
-            </button>
-          </Section>
         </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── OPENCLAW ── */
-function OpenClaw({setPage}) {
-  return (
-    <div style={{position:"relative",zIndex:1,minHeight:"100vh",paddingTop:54}}>
-
-      {/* Hero */}
-      <div className="section-pad" style={{maxWidth:900,margin:"0 auto",padding:"80px 64px 48px",textAlign:"center"}}>
-        <span style={{
-          display:"inline-block",fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:3,
-          padding:"4px 12px",borderRadius:6,marginBottom:20,
-          background:"rgba(35,134,54,0.12)",border:"1px solid rgba(35,134,54,0.4)",color:"var(--accent)",
-        }}>🦞 OPENCLAW INTEGRATION</span>
-        <h1 className="hero-title" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:36,letterSpacing:4,lineHeight:1.3,color:"var(--text-primary)",marginBottom:16}}>
-          Secure your OpenClaw agent with RECUR
-        </h1>
-        <p className="hero-sub" style={{fontSize:14,color:"var(--text-secondary)",lineHeight:1.8,maxWidth:640,margin:"0 auto 32px"}}>
-          OpenClaw agents browse the web, call APIs and execute multi-step plans autonomously. That makes them a prime target for prompt injection attacks. RECUR sits between your agent and your LLM provider, scanning every request and response for adversarial payloads before they can hijack your agent.
-        </p>
-        <div className="cta-row" style={{display:"flex",gap:12,justifyContent:"center"}}>
-          <button onClick={()=>setPage("get-access")} style={{
-            fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:2,
-            padding:"10px 24px",background:"var(--accent)",color:"#fff",
-            border:"1px solid var(--accent)",borderRadius:6,cursor:"pointer",transition:"all 0.2s",
-          }}
-          onMouseEnter={e=>{e.target.style.background="var(--accent-hover)"}}
-          onMouseLeave={e=>{e.target.style.background="var(--accent)"}}>GET ACCESS</button>
-          <button onClick={()=>setPage("docs")} style={{
-            fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:2,
-            padding:"10px 24px",background:"transparent",color:"var(--text-primary)",
-            border:"1px solid var(--border)",borderRadius:6,cursor:"pointer",transition:"all 0.2s",
-          }}
-          onMouseEnter={e=>{e.target.style.borderColor="var(--text-muted)"}}
-          onMouseLeave={e=>{e.target.style.borderColor="var(--border)"}}>VIEW DOCS</button>
-        </div>
-      </div>
-
-      {/* Problem section */}
-      <div className="section-pad" style={{maxWidth:1060,margin:"0 auto",padding:"48px 64px"}}>
-        <h2 style={{fontFamily:"'JetBrains Mono',monospace",fontSize:20,letterSpacing:4,color:"var(--text-primary)",marginBottom:8,textAlign:"center"}}>
-          Why OpenClaw agents are at risk
-        </h2>
-        <p style={{fontSize:12,color:"var(--text-secondary)",textAlign:"center",marginBottom:32}}>Autonomous agents face unique attack surfaces that traditional firewalls don't cover.</p>
-        <div className="grid-3" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
-          <Panel style={{padding:20}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:2,color:"var(--danger)",marginBottom:8}}>PROMPT INJECTION VIA WEB CONTENT</div>
-            <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.8}}>Agent reads a malicious webpage. Hidden instructions hijack its next action.</p>
-          </Panel>
-          <Panel style={{padding:20}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:2,color:"var(--warning)",marginBottom:8}}>SKILL-BASED ATTACKS</div>
-            <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.8}}>Third-party skills can exfiltrate data without user awareness.</p>
-          </Panel>
-          <Panel style={{padding:20}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:2,color:"var(--danger)",marginBottom:8}}>CREDENTIAL THEFT</div>
-            <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.8}}>Injections have been used to extract API keys and crypto wallet keys from agent memory.</p>
-          </Panel>
-        </div>
-      </div>
-
-      {/* How it works — flow diagram */}
-      <div className="section-pad" style={{maxWidth:1060,margin:"0 auto",padding:"48px 64px"}}>
-        <h2 style={{fontFamily:"'JetBrains Mono',monospace",fontSize:20,letterSpacing:4,color:"var(--text-primary)",marginBottom:32,textAlign:"center"}}>
-          How it works
-        </h2>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:0,flexWrap:"wrap"}}>
-          <div style={{background:"var(--surface)",border:"1px solid var(--border)",borderRadius:6,padding:"16px 20px",textAlign:"center",minWidth:150}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:2,color:"var(--accent-emphasis)",marginBottom:4}}>YOUR OPENCLAW AGENT</div>
-            <div style={{fontSize:10,color:"var(--text-secondary)"}}>Sends prompt</div>
-          </div>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:14,color:"var(--text-muted)",padding:"0 12px"}}>→</div>
-          <div style={{background:"var(--surface)",border:"2px solid var(--accent)",borderRadius:6,padding:"16px 20px",textAlign:"center",minWidth:180}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:2,color:"var(--accent)",marginBottom:4}}>RECUR PROXY</div>
-            <div style={{fontSize:10,color:"var(--text-secondary)"}}>Scans &amp; blocks threats</div>
-          </div>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:14,color:"var(--text-muted)",padding:"0 12px"}}>→</div>
-          <div style={{background:"var(--surface)",border:"1px solid var(--border)",borderRadius:6,padding:"16px 20px",textAlign:"center",minWidth:150}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:2,color:"var(--text-primary)",marginBottom:4}}>YOUR LLM PROVIDER</div>
-            <div style={{fontSize:10,color:"var(--text-secondary)"}}>Processes clean request</div>
-          </div>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:14,color:"var(--text-muted)",padding:"0 12px"}}>→</div>
-          <div style={{background:"var(--surface)",border:"1px solid var(--accent)",borderRadius:6,padding:"16px 20px",textAlign:"center",minWidth:150}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:2,color:"var(--accent)",marginBottom:4}}>CLEAN RESPONSE</div>
-            <div style={{fontSize:10,color:"var(--text-secondary)"}}>Returned to agent</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Setup guide */}
-      <div className="section-pad" style={{maxWidth:900,margin:"0 auto",padding:"48px 64px"}}>
-        <h2 style={{fontFamily:"'JetBrains Mono',monospace",fontSize:20,letterSpacing:4,color:"var(--text-primary)",marginBottom:32,textAlign:"center"}}>
-          Add RECUR to OpenClaw in 2 minutes
-        </h2>
-
-        {/* Step 1 */}
-        <div style={{marginBottom:32}}>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,letterSpacing:2,color:"var(--accent)",marginBottom:8}}>STEP 1 — GET YOUR API KEY</div>
-          <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.8,marginBottom:12}}>
-            Sign up at <span style={{color:"var(--accent)",cursor:"pointer"}} onClick={()=>setPage("get-access")}>/get-access</span> to receive your RECUR API key.
-          </p>
-        </div>
-
-        {/* Step 2 */}
-        <div style={{marginBottom:32}}>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,letterSpacing:2,color:"var(--accent)",marginBottom:8}}>STEP 2 — REPLACE ENDPOINT URL</div>
-          <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.8,marginBottom:12}}>
-            Point your OpenClaw agent's LLM endpoint to the RECUR proxy.
-          </p>
-          <Panel style={{overflow:"hidden",marginBottom:8}}>
-            <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border-muted)",
-              display:"flex",gap:8,alignItems:"center",background:"var(--surface)"}}>
-              {["var(--danger)","var(--warning)","var(--accent)"].map((c,i)=>(<div key={i} style={{width:8,height:8,borderRadius:"50%",background:c}}/>))}
-            </div>
-            <pre style={{padding:"20px 24px",fontFamily:"'JetBrains Mono',monospace",fontSize:10,
-              color:"var(--text-primary)",lineHeight:1.9,overflowX:"auto",background:"transparent",whiteSpace:"pre-wrap"}}>{`# Before
-OPENAI_BASE_URL=https://api.openai.com/v1
-
-# After
-OPENAI_BASE_URL=https://recur-protocol.com/api/proxy`}</pre>
-          </Panel>
-        </div>
-
-        {/* Step 3 */}
-        <div style={{marginBottom:32}}>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,letterSpacing:2,color:"var(--accent)",marginBottom:8}}>STEP 3 — ADD ENVIRONMENT VARIABLES</div>
-          <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.8,marginBottom:12}}>
-            Set the required headers as environment variables in your agent config.
-          </p>
-          <Panel style={{overflow:"hidden",marginBottom:8}}>
-            <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border-muted)",
-              display:"flex",gap:8,alignItems:"center",background:"var(--surface)"}}>
-              {["var(--danger)","var(--warning)","var(--accent)"].map((c,i)=>(<div key={i} style={{width:8,height:8,borderRadius:"50%",background:c}}/>))}
-            </div>
-            <pre style={{padding:"20px 24px",fontFamily:"'JetBrains Mono',monospace",fontSize:10,
-              color:"var(--text-primary)",lineHeight:1.9,overflowX:"auto",background:"transparent",whiteSpace:"pre-wrap"}}>{`RECUR_API_KEY=your-recur-api-key
-RECUR_PROVIDER=openai          # openai | anthropic | groq | openrouter | mistral | gemini
-RECUR_TARGET_KEY=your-provider-api-key`}</pre>
-          </Panel>
-        </div>
-
-        {/* Step 4 */}
-        <div style={{marginBottom:32}}>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,letterSpacing:2,color:"var(--accent)",marginBottom:8}}>STEP 4 — RESTART YOUR GATEWAY</div>
-          <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.8}}>
-            Restart your OpenClaw gateway process. All LLM traffic now routes through RECUR's sentinel network. Threats are blocked before they reach your provider.
-          </p>
-        </div>
-      </div>
-
-      {/* What RECUR blocks */}
-      <div className="section-pad" style={{maxWidth:900,margin:"0 auto",padding:"32px 64px",textAlign:"center"}}>
-        <h2 style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,letterSpacing:4,color:"var(--text-primary)",marginBottom:20}}>
-          What RECUR blocks
-        </h2>
-        <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-          {["Prompt Injection","Jailbreak Attempts","Data Extraction","Credential Theft"].map((t,i)=>(
-            <span key={i} style={{
-              fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:2,
-              padding:"6px 14px",borderRadius:6,
-              background:"rgba(35,134,54,0.12)",border:"1px solid rgba(35,134,54,0.4)",color:"var(--accent)",
-            }}>{t.toUpperCase()}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* Attestation callout */}
-      <div className="section-pad" style={{maxWidth:900,margin:"0 auto",padding:"32px 64px"}}>
-        <Panel style={{padding:24,textAlign:"center"}}>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,letterSpacing:3,color:"var(--accent)",marginBottom:8}}>ON-CHAIN ATTESTATION</div>
-          <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.8,maxWidth:560,margin:"0 auto"}}>
-            Every blocked threat and clean pass is recorded as a Solana on-chain proof. Your OpenClaw agent gets a verifiable, immutable security audit trail — without exposing prompt data.
-          </p>
-        </Panel>
-      </div>
-
-      {/* Final CTA */}
-      <div className="section-pad" style={{maxWidth:900,margin:"0 auto",padding:"48px 64px 80px",textAlign:"center"}}>
-        <button onClick={()=>setPage("get-access")} style={{
-          fontFamily:"'JetBrains Mono',monospace",fontSize:13,letterSpacing:3,
-          padding:"12px 32px",background:"var(--accent)",color:"#fff",
-          border:"1px solid var(--accent)",borderRadius:6,cursor:"pointer",transition:"all 0.2s",
-        }}
-        onMouseEnter={e=>{e.target.style.background="var(--accent-hover)"}}
-        onMouseLeave={e=>{e.target.style.background="var(--accent)"}}>PROTECT YOUR AGENT</button>
       </div>
     </div>
   );
@@ -2222,7 +1997,6 @@ const ROUTE_MAP = {
   "/docs": "docs",
   "/blog": "blog",
   "/dashboard": "dashboard",
-  "/openclaw": "openclaw",
 };
 
 const PAGE_TO_PATH = Object.fromEntries(
@@ -2310,9 +2084,6 @@ export default function App() {
   useEffect(()=>{
     document.body.style.overflow = page==="dashboard"?"hidden":"auto";
     document.body.style.height   = page==="dashboard"?"100vh":"auto";
-    document.title = page === "openclaw"
-      ? "Secure OpenClaw Agents from Prompt Injection | RECUR Protocol"
-      : "RECUR Protocol";
     window.scrollTo(0,0);
   },[page]);
 
@@ -2326,7 +2097,6 @@ export default function App() {
       {page==="get-access" && <GetAccess setPage={setPage}/>}
       {page==="use-cases"  && <UseCases setPage={setPage}/>}
       {page==="docs"       && <Docs setPage={setPage}/>}
-      {page==="openclaw"   && <OpenClaw setPage={setPage}/>}
       {page==="blog"       && <Blog setPage={setPage} activeSlug={blogSlug}/>}
       {page==="dashboard" && (
         <Dashboard
