@@ -60,6 +60,21 @@ const css = `
     .nav-hamburger { display: none !important; }
     .nav-mobile { display: none !important; }
   }
+  .blog-article { max-width:720px; margin:0 auto; font-size:16px; line-height:1.75; color:var(--text-primary); }
+  .blog-article h1 { font-size:28px; font-weight:600; margin-bottom:0.5rem; line-height:1.3; font-family:'JetBrains Mono',monospace; }
+  .blog-article h2 { font-size:22px; font-weight:600; margin-top:2.5rem; margin-bottom:0.75rem; color:var(--text-primary); border-bottom:1px solid var(--border); padding-bottom:0.4rem; font-family:'JetBrains Mono',monospace; }
+  .blog-article h3 { font-size:18px; font-weight:600; margin-top:1.75rem; margin-bottom:0.5rem; color:var(--text-primary); font-family:'JetBrains Mono',monospace; }
+  .blog-article p { margin-bottom:1.25rem; color:var(--text-secondary); }
+  .blog-article .toc { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem 1.5rem; margin-bottom:2rem; }
+  .blog-article .toc h4 { font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:0.75rem; font-family:'JetBrains Mono',monospace; }
+  .blog-article .toc a { display:block; font-size:14px; color:var(--accent-emphasis); text-decoration:none; padding:3px 0; }
+  .blog-article .toc a:hover { text-decoration:underline; }
+  .blog-article .faq-q { font-weight:600; color:var(--text-primary); margin-top:1.5rem; margin-bottom:0.4rem; }
+  @media(max-width:768px) {
+    .blog-article { padding:1rem !important; }
+    .blog-article h1 { font-size:22px !important; }
+    .blog-article h2 { font-size:18px !important; }
+  }
 `;
 
 /* ── DATA ── */
@@ -1579,12 +1594,55 @@ The developers who take LLM security seriously now will be the ones who avoid th
     },
   ];
 
+  // Known section headers (h2) and sub-headers (h3)
+  const H2_HEADERS = [
+    "What Is a Prompt Injection Attack?",
+    "Why Prompt Injection Is Getting Worse in 2026",
+    "Types of Prompt Injection Attacks",
+    "Real-World Prompt Injection Examples",
+    "Why Most AI Applications Are Still Exposed",
+    "How to Prevent Prompt Injection Attacks",
+    "Frequently Asked Questions",
+    "Conclusion",
+  ];
+  const H3_HEADERS = [
+    "Direct Prompt Injection",
+    "Indirect Prompt Injection",
+    "Nested Injections",
+    "Role-Play and Persona Manipulation",
+    "Input Validation and Sanitization",
+    "Privilege Separation",
+    "Monitoring and Logging",
+    "Using a Security Proxy Layer",
+  ];
+
+  const toId = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/,"");
+
+  const renderArticle = (content) => {
+    const blocks = content.split("\n\n");
+    const elements = [];
+    for (let i = 0; i < blocks.length; i++) {
+      const text = blocks[i].trim();
+      if (!text) continue;
+      if (H2_HEADERS.includes(text)) {
+        elements.push(<h2 key={i} id={toId(text)}>{text}</h2>);
+      } else if (H3_HEADERS.includes(text)) {
+        elements.push(<h3 key={i} id={toId(text)}>{text}</h3>);
+      } else if (text.startsWith("Q:")) {
+        elements.push(<p key={i} className="faq-q">{text}</p>);
+      } else {
+        elements.push(<p key={i}>{text}</p>);
+      }
+    }
+    return elements;
+  };
+
   if (activeSlug) {
     const post = posts.find(p => p.slug === activeSlug);
     if (!post) { setPage("blog"); return null; }
     return (
       <div style={{position:"relative",zIndex:1,minHeight:"100vh",paddingTop:54}}>
-        <article className="section-pad" style={{padding:"48px 64px",maxWidth:800,margin:"0 auto"}}>
+        <div className="section-pad" style={{padding:"48px 64px",maxWidth:800,margin:"0 auto"}}>
           <button onClick={()=>setPage("blog")} style={{
             fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:2,
             padding:"6px 14px",background:"transparent",color:"var(--text-secondary)",
@@ -1594,15 +1652,19 @@ The developers who take LLM security seriously now will be the ones who avoid th
             onMouseLeave={e=>e.target.style.borderColor="var(--border)"}>
             ← BACK TO BLOG
           </button>
-          <div style={{fontSize:10,color:"var(--text-muted)",letterSpacing:2,marginBottom:8}}>{post.date}</div>
-          <h1 style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,letterSpacing:2,
-            color:"var(--text-primary)",marginBottom:24,lineHeight:1.3}}>{post.title}</h1>
-          <div style={{fontSize:14,color:"var(--text-secondary)",lineHeight:1.9}}>
-            {post.content.split("\n\n").map((para,i) => (
-              <p key={i} style={{marginBottom:20}}>{para}</p>
-            ))}
-          </div>
-        </article>
+          <article className="blog-article">
+            <div style={{fontSize:10,color:"var(--text-muted)",letterSpacing:2,marginBottom:8}}>{post.date}</div>
+            <h1>{post.title}</h1>
+            <div className="toc">
+              <h4>Table of Contents</h4>
+              {H2_HEADERS.filter(h=>h!=="Conclusion").map(h=>(
+                <a key={h} onClick={()=>document.getElementById(toId(h))?.scrollIntoView({behavior:"smooth"})}
+                  style={{cursor:"pointer"}}>{h}</a>
+              ))}
+            </div>
+            {renderArticle(post.content)}
+          </article>
+        </div>
       </div>
     );
   }
