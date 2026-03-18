@@ -131,8 +131,8 @@ const backendEventToAttestation = (evt) => ({
 });
 
 /* ── SHARED UI ── */
-const Panel = ({children,style={}}) => (
-  <div style={{background:"var(--surface)",border:"1px solid var(--border)",
+const Panel = ({children,style={},onClick,className}) => (
+  <div className={className} onClick={onClick} style={{background:"var(--surface)",border:"1px solid var(--border)",
     borderRadius:6,position:"relative",overflow:"hidden",
     boxShadow:"0 1px 3px rgba(0,0,0,0.3)", ...style}}>
     {children}
