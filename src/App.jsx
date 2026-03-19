@@ -246,17 +246,19 @@ function Nav({page, setPage, apiOnline}) {
                 <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>LLM PROVIDERS</div>
                 <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>OpenAI, Anthropic, Gemini + 3 more</div>
               </div>
-              <div style={{
-                padding:"12px 16px",borderBottom:"1px solid var(--border-muted)",
+              <div onClick={()=>{setPage("docs-agents");setDocsDropOpen(false);}} style={{
+                padding:"12px 16px",cursor:"pointer",borderBottom:"1px solid var(--border-muted)",
                 display:"flex",justifyContent:"space-between",alignItems:"center",
-                opacity:0.5,cursor:"default",
-              }}>
+                transition:"background 0.15s",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background="var(--bg)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 <div>
                   <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--text-primary)",letterSpacing:1}}>AGENT INTEGRATIONS</div>
                   <div style={{fontSize:9,color:"var(--text-secondary)",marginTop:2}}>OpenClaw and more</div>
                 </div>
-                <span style={{fontSize:8,color:"var(--warning)",padding:"2px 6px",
-                  background:"rgba(210,153,34,0.12)",border:"1px solid rgba(210,153,34,0.4)",borderRadius:3}}>SOON</span>
+                <span style={{fontSize:8,color:"var(--accent)",padding:"2px 6px",
+                  background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:3}}>NEW</span>
               </div>
               <div onClick={()=>{setPage("docs");setDocsDropOpen(false);setTimeout(()=>document.getElementById("error-codes")?.scrollIntoView({behavior:"smooth"}),100);}} style={{
                 padding:"12px 16px",cursor:"pointer",
@@ -1314,7 +1316,7 @@ function Docs({setPage}) {
     {id:"provider-switching",label:"Provider Switching"},
     {id:"request-headers",label:"Request Headers"},
     {id:"supported-providers",label:"Supported Providers",link:"docs-providers"},
-    {id:"agent-integrations",label:"Agent Integrations",disabled:true,badge:"SOON"},
+    {id:"agent-integrations",label:"Agent Integrations",link:"docs-agents",badge:"NEW"},
     {id:"error-codes",label:"Error Codes"},
   ];
 
@@ -1406,15 +1408,17 @@ fetch("https://recur-protocol.com/api/proxy", {
               <div style={{fontSize:10,color:"var(--text-secondary)",lineHeight:1.7,marginBottom:8}}>OpenAI, Anthropic, Gemini + 3 more</div>
               <div style={{fontSize:9,color:"var(--accent)",letterSpacing:1}}>View all →</div>
             </div>
-            <div style={{background:"var(--surface)",border:"1px solid var(--border-muted)",
-              borderRadius:6,padding:"20px",opacity:0.5,cursor:"default",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}>
+            <div onClick={()=>setPage("docs-agents")} style={{background:"var(--surface)",border:"1px solid var(--border)",
+              borderRadius:6,padding:"20px",cursor:"pointer",transition:"border-color 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}
+              onMouseEnter={e=>e.currentTarget.style.borderColor="var(--text-muted)"}
+              onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,letterSpacing:2,color:"var(--text-muted)"}}>AGENT INTEGRATIONS</span>
-                <span style={{fontSize:8,color:"var(--warning)",padding:"1px 5px",
-                  background:"rgba(210,153,34,0.12)",border:"1px solid rgba(210,153,34,0.4)",borderRadius:3}}>SOON</span>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,letterSpacing:2,color:"var(--text-primary)"}}>AGENT INTEGRATIONS</span>
+                <span style={{fontSize:8,color:"var(--accent)",padding:"1px 5px",
+                  background:"rgba(35,134,54,0.15)",border:"1px solid rgba(35,134,54,0.4)",borderRadius:3}}>NEW</span>
               </div>
-              <div style={{fontSize:10,color:"var(--text-muted)",lineHeight:1.7,marginBottom:8}}>OpenClaw and more</div>
-              <div style={{fontSize:9,color:"var(--text-muted)",letterSpacing:1}}>Coming soon</div>
+              <div style={{fontSize:10,color:"var(--text-secondary)",lineHeight:1.7,marginBottom:8}}>OpenClaw and more</div>
+              <div style={{fontSize:9,color:"var(--accent)",letterSpacing:1}}>View all →</div>
             </div>
           </div>
 
@@ -1689,21 +1693,69 @@ function DocAgents({setPage}) {
         <div style={{marginBottom:28}}>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:2,color:"var(--accent)",marginBottom:8}}>STEP 2 — UPDATE YOUR OPENCLAW CONFIG</div>
           <p style={{fontSize:11,color:"var(--text-secondary)",lineHeight:1.8,marginBottom:12}}>
-            In your OpenClaw .env or config, override the base URL and add RECUR credentials:
+            Add RECUR as a provider in your OpenClaw <code style={{color:"var(--accent)"}}>models</code> config:
           </p>
+          <Panel style={{overflow:"hidden"}}>
+            <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border-muted)",
+              display:"flex",gap:8,alignItems:"center",background:"var(--surface)"}}>
+              {["var(--danger)","var(--warning)","var(--accent)"].map((c,i)=>(<div key={i} style={{width:8,height:8,borderRadius:"50%",background:c}}/>))}
+              <span style={{fontSize:9,color:"var(--text-muted)",marginLeft:8,letterSpacing:1}}>openclaw config</span>
+            </div>
+            <pre style={{padding:"20px 24px",fontFamily:"'JetBrains Mono',monospace",fontSize:10,
+              color:"var(--text-primary)",lineHeight:1.9,overflowX:"auto",background:"transparent",whiteSpace:"pre-wrap"}}>{`{
+  "models": {
+    "providers": {
+      "recur": {
+        "baseUrl": "https://recur-protocol.com/api/proxy",
+        "apiKey": "recur_live_your_key_here",
+        "api": "openai-completions",
+        "authHeader": false,
+        "headers": {
+          "x-recur-api-key": "recur_live_your_key_here",
+          "x-recur-provider": "openai",
+          "x-recur-target-key": "sk-your-openai-key"
+        },
+        "models": [
+          {
+            "id": "gpt-4o-mini",
+            "name": "GPT-4o Mini via RECUR"
+          }
+        ]
+      }
+    },
+    "defaults": {
+      "provider": "recur",
+      "model": "recur/gpt-4o-mini"
+    }
+  }
+}`}</pre>
+          </Panel>
+          <div style={{fontSize:10,color:"var(--text-muted)",lineHeight:1.7,marginTop:10,padding:"10px 14px",
+            background:"var(--surface)",border:"1px solid var(--border-muted)",borderRadius:6}}>
+            <code style={{color:"var(--accent)"}}>authHeader: false</code> disables OpenClaw's default Authorization header. RECUR reads <code style={{color:"var(--accent)"}}>x-recur-api-key</code> instead. Both <code style={{color:"var(--accent)"}}>apiKey</code> and <code style={{color:"var(--accent)"}}>x-recur-api-key</code> should contain your RECUR key — <code style={{color:"var(--accent)"}}>apiKey</code> satisfies OpenClaw's schema requirement, <code style={{color:"var(--accent)"}}>x-recur-api-key</code> is what RECUR validates.
+          </div>
+        </div>
+
+        <div style={{marginBottom:28}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:2,color:"var(--text-secondary)",marginBottom:8}}>SWITCH TO ANTHROPIC CLAUDE</div>
           <Panel style={{overflow:"hidden"}}>
             <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border-muted)",
               display:"flex",gap:8,alignItems:"center",background:"var(--surface)"}}>
               {["var(--danger)","var(--warning)","var(--accent)"].map((c,i)=>(<div key={i} style={{width:8,height:8,borderRadius:"50%",background:c}}/>))}
             </div>
             <pre style={{padding:"20px 24px",fontFamily:"'JetBrains Mono',monospace",fontSize:10,
-              color:"var(--text-primary)",lineHeight:1.9,overflowX:"auto",background:"transparent",whiteSpace:"pre-wrap"}}>{`# OpenAI-backed OpenClaw
-OPENAI_BASE_URL=https://recur-protocol.com/api/proxy
-OPENAI_API_KEY=recur_live_your_key_here
-
-# Add these RECUR-specific headers via OpenClaw's custom headers config:
-X_RECUR_PROVIDER=openai
-X_RECUR_TARGET_KEY=sk-your-actual-openai-key`}</pre>
+              color:"var(--text-primary)",lineHeight:1.9,overflowX:"auto",background:"transparent",whiteSpace:"pre-wrap"}}>{`// Switch to Anthropic Claude:
+"headers": {
+  "x-recur-api-key": "recur_live_your_key_here",
+  "x-recur-provider": "anthropic",
+  "x-recur-target-key": "sk-ant-your-anthropic-key"
+},
+"models": [
+  {
+    "id": "claude-sonnet-4-20250514",
+    "name": "Claude Sonnet via RECUR"
+  }
+]`}</pre>
           </Panel>
         </div>
 
@@ -2333,6 +2385,7 @@ const ROUTE_MAP = {
   "/use-cases": "use-cases",
   "/docs": "docs",
   "/docs/providers": "docs-providers",
+  "/docs/agents": "docs-agents",
   "/blog": "blog",
   "/dashboard": "dashboard",
 };
@@ -2439,6 +2492,7 @@ export default function App() {
       {page==="use-cases"  && <UseCases setPage={setPage}/>}
       {page==="docs"       && <Docs setPage={setPage}/>}
       {page==="docs-providers" && <DocProviders setPage={setPage}/>}
+      {page==="docs-agents" && <DocAgents setPage={setPage}/>}
       {page==="blog"       && <Blog setPage={setPage} activeSlug={blogSlug}/>}
       {page==="dashboard" && (
         <Dashboard
